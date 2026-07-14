@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VASTET 毛孩鮮食配方師</title>
+  <style>
+    :root { --black:#000; --gold:#C9A961; --cream:#F5EFE0; --muted:#6f675b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif; background:var(--cream); color:var(--black); }
+    main { max-width: 1080px; margin: 0 auto; padding: 32px 18px; }
+    .hero,.card,footer { background:#fffaf0; border:1px solid rgba(201,169,97,.35); border-radius:24px; padding:24px; box-shadow:0 18px 44px rgba(0,0,0,.08); margin-bottom:18px; }
+    h1,h2 { margin:0 0 12px; letter-spacing:.04em; }
+    .brand { color:var(--gold); font-weight:800; text-transform:uppercase; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+    label { display:block; font-weight:700; margin-bottom:8px; }
+    input,select,button { width:100%; border-radius:14px; border:1px solid rgba(0,0,0,.16); padding:12px 14px; font:inherit; }
+    button { background:var(--black); color:var(--cream); border-color:var(--black); cursor:pointer; font-weight:800; }
+    button.secondary { background:transparent; color:var(--black); border-color:var(--gold); }
+    .ingredient { display:grid; grid-template-columns: 1fr 100px; gap:10px; align-items:end; margin-bottom:10px; }
+    .cook-toggle { display:flex; gap:10px; flex-wrap:wrap; }
+    .cook-toggle button { flex:1 1 180px; }
+    .cook-toggle button.active { background:var(--gold); color:var(--black); border-color:var(--gold); }
+    .notice { border-left:4px solid var(--gold); background:rgba(201,169,97,.14); padding:12px 14px; border-radius:12px; margin-top:12px; }
+    .bar { height:12px; border-radius:999px; background:#e8dcc6; overflow:hidden; }
+    .fill { height:100%; width:0%; background:var(--gold); transition:width .2s ease; }
+    .skeleton { min-height:160px; border-radius:18px; background:linear-gradient(90deg,#eee0c9,#fff8ea,#eee0c9); background-size:200% 100%; animation:pulse 1.2s infinite; }
+    @keyframes pulse { to { background-position:-200% 0; } }
+    .muted { color:var(--muted); font-size:.92rem; }
+    footer p { margin:.25rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="brand">VASTET</div>
+      <h1>毛孩鮮食配方師</h1>
+      <p>以公開營養參考資料估算配方能量與礦物質；本工具不提供診斷、治療或取代獸醫建議。</p>
+    </section>
+
+    <section class="card">
+      <h2>食材選擇</h2>
+      <div id="loading" class="skeleton" aria-label="資料載入中"></div>
+      <div id="app" hidden>
+        <div class="grid">
+          <div>
+            <label for="healthMode">照護模式</label>
+            <select id="healthMode">
+              <option value="general">一般</option>
+              <option value="ckd">CKD 腎臟照護</option>
+            </select>
+          </div>
+          <div>
+            <label for="ingredientSelect">新增食材</label>
+            <select id="ingredientSelect"></select>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="addIngredient" type="button">加入食材</button>
+          </div>
+        </div>
+        <div id="ingredientRows"></div>
+        <h2>烹調方式</h2>
+        <div class="cook-toggle" role="group" aria-label="烹調方式">
+          <button id="cookSoup" class="active" type="button" data-mode="連湯">連湯餵食</button>
+          <button id="cookDrain" type="button" data-mode="棄湯">棄掉湯汁</button>
+        </div>
+        <div id="ckdTip" class="notice" hidden>🩺 腎貓/腎犬照護技巧：肉類水煮後倒掉湯汁，可再降低約 30–35% 的磷與鉀。溶進湯裡的磷不會進入毛孩體內。你仍可自行改回連湯模式。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>營養達標度</h2>
+      <p>總熱量：<strong id="kcalTotal">0</strong> kcal</p>
+      <p>磷：<strong id="phosTotal">0</strong> mg</p>
+      <div class="bar"><div id="phosBar" class="fill"></div></div>
+      <p class="muted">切換「棄湯」會依食材 cook_group 係數即時重算磷與鉀。</p>
+    </section>
+
+    <section class="card">
+      <h2>取得電子書</h2>
+      <form id="emailForm">
+        <div class="grid">
+          <div><label for="email">Email</label><input id="email" type="email" required placeholder="you@example.com" /></div>
+          <div><label for="supabaseUrl">Supabase URL</label><input id="supabaseUrl" type="url" placeholder="https://xxxx.supabase.co" /></div>
+          <div><label for="supabaseAnonKey">Anon Key</label><input id="supabaseAnonKey" type="password" placeholder="新專案 anon key" /></div>
+        </div>
+        <p class="muted">請填入新開的 vastet-freshfood Supabase 專案設定；不要使用 nqadvdjrkollatfldctj。</p>
+        <button type="submit">送出</button>
+        <p id="emailStatus" class="muted"></p>
+      </form>
+    </section>
+
+    <footer>
+      <p id="sourceNutrition">食材營養數據：載入中</p>
+      <p id="sourceCooking">烹調換算：載入中</p>
+      <p class="muted" id="dataVersion"></p>
+    </footer>
+  </main>
+<script>
+const NUTRITION_DB_URL = './public/data/nutrition-db-v1.json';
+const ING_FALLBACK = [
+  {id:'I0108301', name_zh:'牛腱', cook_group:'牛肉', ui_group:'protein', per100g:{kcal:139, protein_g:19.8, fat_g:6, carb_g:0, fiber_g:0, ca_mg:8, p_mg:184, na_mg:79, k_mg:298, fe_mg:3, zn_mg:7.2}, hi_phos:false, chicken:false},
+  {id:'E5800402', name_zh:'青花菜(綠花椰)', cook_group:'蔬菜', ui_group:'veg', per100g:{kcal:38, protein_g:3.4, fat_g:0.4, carb_g:6.5, fiber_g:2.8, ca_mg:30, p_mg:61, na_mg:13, k_mg:349, fe_mg:1.2, zn_mg:0.7}, hi_phos:false, chicken:false}
+];
+const FALLBACK_FACTORS = {
+  '牛肉': { '連湯': {kcal:1.471, protein:1.471, fat:1.471, p:1.471, k:1.471}, '棄湯': {kcal:1.471, protein:1.471, fat:1.471, p:0.956, k:0.809} },
+  '蔬菜': { '連湯': {kcal:1.111, protein:1.111, fat:1.111, p:1.111, k:1.111}, '棄湯': {kcal:1.111, protein:1.111, fat:1.111, p:1, k:1} }
+};
+let nutritionDb = { ingredients: ING_FALLBACK, cook_factors: FALLBACK_FACTORS, sources: {} };
+let cookMode = '連湯';
+let rows = [];
+const nutrientKeyMap = { kcal:'kcal', protein_g:'protein', fat_g:'fat', p_mg:'p', k_mg:'k' };
+
+function factorFor(ingredient, nutrient) {
+  const group = nutritionDb.cook_factors?.[ingredient.cook_group] || nutritionDb.cook_factors?.['已為熟值'];
+  const mode = group?.[cookMode] || group?.['連湯'];
+  return mode?.[nutrientKeyMap[nutrient] || nutrient] ?? 1;
+}
+function cookedValue(ingredient, nutrient, grams) {
+  return (ingredient.per100g[nutrient] || 0) * factorFor(ingredient, nutrient) * grams / 100;
+}
+function renderSources() {
+  const s = nutritionDb.sources || {};
+  document.getElementById('sourceNutrition').textContent = `食材營養數據：${s.nutrition || '衛福部食藥署食品營養成分資料庫'}`;
+  document.getElementById('sourceCooking').textContent = `烹調換算：${[s.retention, s.yield].filter(Boolean).join(' + ') || 'USDA Nutrient Retention Factors R6 + 食藥署生熟實測反推'}`;
+  document.getElementById('dataVersion').textContent = `資料版本：${nutritionDb.version || 'fallback'}，更新日：${nutritionDb.updated || '未標示'}`;
+}
+function renderOptions() {
+  ingredientSelect.innerHTML = nutritionDb.ingredients.map(i => `<option value="${i.id}">${i.name_zh}${i.hi_phos ? ' ⚠ 高磷' : ''}</option>`).join('');
+}
+function renderRows() {
+  ingredientRows.innerHTML = rows.map((r, idx) => `<div class="ingredient"><label>${r.ingredient.name_zh}<input type="number" min="0" step="1" value="${r.grams}" data-idx="${idx}" class="grams" /></label><button type="button" class="secondary remove" data-idx="${idx}">移除</button></div>`).join('');
+  document.querySelectorAll('.grams').forEach(input => input.addEventListener('input', e => { rows[e.target.dataset.idx].grams = Number(e.target.value) || 0; calculate(); }));
+  document.querySelectorAll('.remove').forEach(btn => btn.addEventListener('click', e => { rows.splice(Number(e.target.dataset.idx), 1); renderRows(); calculate(); }));
+}
+function calculate() {
+  const kcal = rows.reduce((sum, r) => sum + cookedValue(r.ingredient, 'kcal', r.grams), 0);
+  const phos = rows.reduce((sum, r) => sum + cookedValue(r.ingredient, 'p_mg', r.grams), 0);
+  kcalTotal.textContent = kcal.toFixed(0);
+  phosTotal.textContent = phos.toFixed(0);
+  phosBar.style.width = `${Math.min(100, phos / 10)}%`;
+}
+function setCookMode(mode) {
+  cookMode = mode;
+  document.querySelectorAll('.cook-toggle button').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+  calculate();
+}
+async function loadNutritionDb() {
+  try {
+    const response = await fetch(NUTRITION_DB_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    nutritionDb = await response.json();
+  } catch (error) {
+    console.warn('Nutrition DB fetch failed; using ING_FALLBACK.', error);
+    nutritionDb = { version: 'fallback', ingredients: ING_FALLBACK, cook_factors: FALLBACK_FACTORS, sources: {} };
+  } finally {
+    renderSources(); renderOptions(); loading.hidden = true; app.hidden = false;
+  }
+}
+healthMode.addEventListener('change', e => {
+  if (e.target.value === 'ckd') { setCookMode('棄湯'); ckdTip.hidden = false; } else { ckdTip.hidden = true; }
+});
+document.querySelectorAll('.cook-toggle button').forEach(btn => btn.addEventListener('click', () => setCookMode(btn.dataset.mode)));
+addIngredient.addEventListener('click', () => {
+  const ingredient = nutritionDb.ingredients.find(i => i.id === ingredientSelect.value);
+  if (ingredient) rows.push({ ingredient, grams: 100 });
+  renderRows(); calculate();
+});
+emailForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const url = supabaseUrl.value.replace(/\/$/, '');
+  const key = supabaseAnonKey.value;
+  if (!url || !key || url.includes('nqadvdjrkollatfldctj')) { emailStatus.textContent = '請填入新的品牌 Supabase 專案設定，且不可使用舊專案。'; return; }
+  const res = await fetch(`${url}/rest/v1/subscribers`, { method:'POST', headers:{ apikey:key, Authorization:`Bearer ${key}`, 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ email: email.value, source:'freshfood_calculator', lang:'zh' }) });
+  emailStatus.textContent = res.ok ? '已送出，謝謝你！' : '送出失敗，請稍後再試。';
+});
+loadNutritionDb();
+</script>
+</body>
+</html>

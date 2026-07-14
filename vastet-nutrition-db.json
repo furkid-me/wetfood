@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-07-14",
+  "sources": {
+    "nutrition": "衛生福利部食品藥物管理署 食品營養成分資料庫(TFND)",
+    "retention": "USDA Table of Nutrient Retention Factors, Release 6 (2007)",
+    "yield": "TFND 生熟實測配對反推 + USDA Cooking Yields 典型值"
+  },
+  "notice": "本資料為公開營養參考數據，非醫療建議。",
+  "ingredients": [
+    {"id":"I0402102","name_zh":"雞里肌(近似雞胸)","name_en":"","tfnd_name":"里肌肉(肉雞)","category":"肉類","ui_group":"protein","cook_group":"雞肉","state":"生","per100g":{"kcal":106,"protein_g":23.7,"fat_g":0.6,"carb_g":0,"fiber_g":0,"ca_mg":2,"p_mg":219,"na_mg":44,"k_mg":352,"fe_mg":0.7,"zn_mg":0.9},"hi_phos":false,"chicken":true,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"USDA產率係數"},
+    {"id":"I0108301","name_zh":"牛腱","name_en":"","tfnd_name":"牛後腿腱子心","category":"肉類","ui_group":"protein","cook_group":"牛肉","state":"生","per100g":{"kcal":139,"protein_g":19.8,"fat_g":6,"carb_g":0,"fiber_g":0,"ca_mg":8,"p_mg":184,"na_mg":79,"k_mg":298,"fe_mg":3,"zn_mg":7.2},"hi_phos":false,"chicken":false,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"USDA產率係數"},
+    {"id":"J0402401","name_zh":"鮭魚","name_en":"","tfnd_name":"大西洋鮭魚(台灣養殖)","category":"魚貝類","ui_group":"protein","cook_group":"魚","state":"生","per100g":{"kcal":155,"protein_g":23.6,"fat_g":6,"carb_g":0,"fiber_g":0,"ca_mg":9,"p_mg":226,"na_mg":45,"k_mg":390,"fe_mg":0,"zn_mg":0.8},"hi_phos":true,"chicken":false,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"USDA產率係數"},
+    {"id":"K0111601","name_zh":"雞蛋白(水煮)","name_en":"","tfnd_name":"雞水煮蛋白","category":"蛋類","ui_group":"protein","cook_group":"已為熟值","state":"熟","per100g":{"kcal":61,"protein_g":13.6,"fat_g":0.2,"carb_g":1.5,"fiber_g":0,"ca_mg":7,"p_mg":15,"na_mg":170,"k_mg":142,"fe_mg":0,"zn_mg":0.5},"hi_phos":false,"chicken":false,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"TFND實測熟樣本"},
+    {"id":"B0700201","name_zh":"馬鈴薯","name_en":"","tfnd_name":"馬鈴薯","category":"澱粉類","ui_group":"carb","cook_group":"根莖澱粉","state":"生","per100g":{"kcal":77,"protein_g":2.6,"fat_g":0.2,"carb_g":15.8,"fiber_g":1.3,"ca_mg":4,"p_mg":38,"na_mg":3,"k_mg":386,"fe_mg":0.6,"zn_mg":1.1},"hi_phos":false,"chicken":false,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"USDA產率係數"},
+    {"id":"E5800402","name_zh":"青花菜(綠花椰)","name_en":"","tfnd_name":"青花菜(2021年取樣)","category":"蔬菜類","ui_group":"veg","cook_group":"蔬菜","state":"生","per100g":{"kcal":38,"protein_g":3.4,"fat_g":0.4,"carb_g":6.5,"fiber_g":2.8,"ca_mg":30,"p_mg":61,"na_mg":13,"k_mg":349,"fe_mg":1.2,"zn_mg":0.7},"hi_phos":false,"chicken":false,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"USDA產率係數"},
+    {"id":"M2700101","name_zh":"橄欖油","name_en":"","tfnd_name":"橄欖油","category":"油脂類","ui_group":"oil","cook_group":"油脂","state":"生","per100g":{"kcal":884,"protein_g":0,"fat_g":100,"carb_g":0,"fiber_g":0,"ca_mg":0,"p_mg":0,"na_mg":0,"k_mg":0,"fe_mg":0,"zn_mg":0},"hi_phos":false,"chicken":false,"source":"衛福部食藥署食品營養成分資料庫","cook_source":"USDA產率係數"}
+  ],
+  "cook_factors": {
+    "雞肉":{"連湯":{"kcal":1.333,"protein":1.333,"fat":1.333,"ca":1.333,"p":1.333,"na":1.333,"k":1.333,"fe":1.333,"zn":1.333,"usda_code":"chicken_simmer_w","yield_rate":0.75},"棄湯":{"kcal":1.333,"protein":1.333,"fat":1.333,"ca":1.067,"p":0.933,"na":0.933,"k":0.8,"fe":1.2,"zn":1.333,"usda_code":"chicken_simmer_wo","yield_rate":0.75}},
+    "牛肉":{"連湯":{"kcal":1.471,"protein":1.471,"fat":1.471,"ca":1.471,"p":1.471,"na":1.471,"k":1.471,"fe":1.471,"zn":1.471,"usda_code":"beef_simmer_w","yield_rate":0.68},"棄湯":{"kcal":1.471,"protein":1.471,"fat":1.471,"ca":1.176,"p":0.956,"na":0.809,"k":0.809,"fe":1.471,"zn":1.471,"usda_code":"beef_simmer_wo","yield_rate":0.68}},
+    "魚":{"連湯":{"kcal":1.205,"protein":1.205,"fat":1.205,"ca":1.205,"p":1.205,"na":1.205,"k":1.205,"fe":1.205,"zn":1.205,"usda_code":"fish_simmer_w","yield_rate":0.83},"棄湯":{"kcal":1.205,"protein":1.205,"fat":1.205,"ca":1.205,"p":1.084,"na":1.084,"k":1.024,"fe":1.205,"zn":1.205,"usda_code":"fish_simmer_wo","yield_rate":0.83}},
+    "根莖澱粉":{"連湯":{"kcal":1.087,"protein":1.087,"fat":1.087,"ca":1.087,"p":1.087,"na":1.087,"k":1.087,"fe":1.087,"zn":1.087,"usda_code":"root_steam","yield_rate":0.92},"棄湯":{"kcal":1.087,"protein":1.087,"fat":1.087,"ca":1.033,"p":0.978,"na":1.033,"k":0.978,"fe":1.033,"zn":1.033,"usda_code":"root_boil_drain","yield_rate":0.92}},
+    "蔬菜":{"連湯":{"kcal":1.111,"protein":1.111,"fat":1.111,"ca":1.111,"p":1.111,"na":1.111,"k":1.111,"fe":1.111,"zn":1.111,"usda_code":"veg_steam","yield_rate":0.9},"棄湯":{"kcal":1.111,"protein":1.111,"fat":1.111,"ca":1.056,"p":1,"na":1.056,"k":1,"fe":1.056,"zn":1.056,"usda_code":"veg_boil_drain","yield_rate":0.9}},
+    "油脂":{"連湯":{"kcal":1,"protein":1,"fat":1,"ca":1,"p":1,"na":1,"k":1,"fe":1,"zn":1,"usda_code":"oil","yield_rate":1},"棄湯":{"kcal":1,"protein":1,"fat":1,"ca":1,"p":1,"na":1,"k":1,"fe":1,"zn":1,"usda_code":"oil","yield_rate":1}},
+    "已為熟值":{"連湯":{"kcal":1,"protein":1,"fat":1,"ca":1,"p":1,"na":1,"k":1,"fe":1,"zn":1,"usda_code":"TFND_measured","yield_rate":1},"棄湯":{"kcal":1,"protein":1,"fat":1,"ca":1,"p":1,"na":1,"k":1,"fe":1,"zn":1,"usda_code":"TFND_measured","yield_rate":1}}
+  }
+}
