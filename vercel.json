@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/data/nutrition-db-v1.json",
+      "source": "/public/data/nutrition-db-v1.json",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
