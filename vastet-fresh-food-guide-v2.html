@@ -41,6 +41,7 @@
     <section class="card">
       <h2>食材選擇</h2>
       <div id="loading" class="skeleton" aria-label="資料載入中"></div>
+      <div id="offlineNotice" class="notice" hidden>離線模式，數據為簡化版。請恢復網路後重新整理，以使用完整 VASTET 公共營養資料庫。</div>
       <div id="app" hidden>
         <div class="grid">
           <div>
@@ -99,14 +100,8 @@
   </main>
 <script>
 const NUTRITION_DB_URL = './public/data/nutrition-db-v1.json';
-const ING_FALLBACK = [
-  {id:'I0108301', name_zh:'牛腱', cook_group:'牛肉', ui_group:'protein', per100g:{kcal:139, protein_g:19.8, fat_g:6, carb_g:0, fiber_g:0, ca_mg:8, p_mg:184, na_mg:79, k_mg:298, fe_mg:3, zn_mg:7.2}, hi_phos:false, chicken:false},
-  {id:'E5800402', name_zh:'青花菜(綠花椰)', cook_group:'蔬菜', ui_group:'veg', per100g:{kcal:38, protein_g:3.4, fat_g:0.4, carb_g:6.5, fiber_g:2.8, ca_mg:30, p_mg:61, na_mg:13, k_mg:349, fe_mg:1.2, zn_mg:0.7}, hi_phos:false, chicken:false}
-];
-const FALLBACK_FACTORS = {
-  '牛肉': { '連湯': {kcal:1.471, protein:1.471, fat:1.471, p:1.471, k:1.471}, '棄湯': {kcal:1.471, protein:1.471, fat:1.471, p:0.956, k:0.809} },
-  '蔬菜': { '連湯': {kcal:1.111, protein:1.111, fat:1.111, p:1.111, k:1.111}, '棄湯': {kcal:1.111, protein:1.111, fat:1.111, p:1, k:1} }
-};
+const ING_FALLBACK = [];
+const FALLBACK_FACTORS = {};
 let nutritionDb = { ingredients: ING_FALLBACK, cook_factors: FALLBACK_FACTORS, sources: {} };
 let cookMode = '連湯';
 let rows = [];
@@ -127,7 +122,8 @@ function renderSources() {
   document.getElementById('dataVersion').textContent = `資料版本：${nutritionDb.version || 'fallback'}，更新日：${nutritionDb.updated || '未標示'}`;
 }
 function renderOptions() {
-  ingredientSelect.innerHTML = nutritionDb.ingredients.map(i => `<option value="${i.id}">${i.name_zh}${i.hi_phos ? ' ⚠ 高磷' : ''}</option>`).join('');
+  ingredientSelect.innerHTML = nutritionDb.ingredients.length ? nutritionDb.ingredients.map(i => `<option value="${i.id}">${i.name_zh}${i.hi_phos ? ' ⚠ 高磷' : ''}</option>`).join('') : '<option value="">離線模式無可用食材</option>';
+  addIngredient.disabled = nutritionDb.ingredients.length === 0;
 }
 function renderRows() {
   ingredientRows.innerHTML = rows.map((r, idx) => `<div class="ingredient"><label>${r.ingredient.name_zh}<input type="number" min="0" step="1" value="${r.grams}" data-idx="${idx}" class="grams" /></label><button type="button" class="secondary remove" data-idx="${idx}">移除</button></div>`).join('');
@@ -154,6 +150,7 @@ async function loadNutritionDb() {
   } catch (error) {
     console.warn('Nutrition DB fetch failed; using ING_FALLBACK.', error);
     nutritionDb = { version: 'fallback', ingredients: ING_FALLBACK, cook_factors: FALLBACK_FACTORS, sources: {} };
+    offlineNotice.hidden = false;
   } finally {
     renderSources(); renderOptions(); loading.hidden = true; app.hidden = false;
   }
