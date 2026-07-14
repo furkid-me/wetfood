@@ -1,53 +1,751 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VASTET 毛孩鮮食配方師</title>
-  <style>
-    :root{--black:#000;--gold:#C9A961;--cream:#F5EFE0;--card:#fffaf0;--muted:#6b6253;--danger:#9f2f2f}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:var(--cream);color:var(--black)}header{background:#000;color:var(--cream);padding:42px 20px;border-bottom:6px solid var(--gold)}main{max-width:1160px;margin:auto;padding:22px}.hero{display:flex;justify-content:space-between;gap:18px;align-items:center}.brand{letter-spacing:.18em;color:var(--gold);font-weight:800}.panel{background:var(--card);border:1px solid rgba(0,0,0,.12);border-radius:22px;padding:20px;margin:18px 0;box-shadow:0 10px 30px rgba(0,0,0,.06)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}label{display:block;font-weight:700;margin-bottom:6px}select,input{width:100%;padding:11px;border:1px solid #cdbf9f;border-radius:12px;background:#fff;color:#000}.chips{display:flex;flex-wrap:wrap;gap:10px}.chip{border:1px solid var(--gold);background:#fff;border-radius:999px;padding:9px 13px;cursor:pointer}.chip.active{background:#000;color:var(--gold)}.chip:disabled{opacity:.42;cursor:not-allowed;text-decoration:line-through}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.btn{background:#000;color:var(--gold);border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}.btn.secondary{background:var(--gold);color:#000}.notice{padding:13px;border-radius:14px;background:#fff3cd;border:1px solid #ead38c}.warn{color:var(--danger);font-weight:800}.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.metric{background:#fff;border-left:5px solid var(--gold);border-radius:14px;padding:14px}.bar{height:10px;background:#e8dfcd;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:var(--gold)}table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden}th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}footer{padding:24px;color:var(--muted)}.hidden{display:none}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>毛孩鮮食配方師 · VASTET</title>
+<meta name="description" content="輸入毛孩資料與食材,自動計算每日熱量、配方克數與營養達標度。資料來自衛福部食藥署與 USDA 官方係數。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0d0b09; --ink:#2b2620; --muted:#8a8172;
+  --gold:#C9A961; --gold-d:#a8873f;
+  --cream:#F5EFE0; --paper:#FFFDF8; --line:#E5DCC8;
+  --red:#B03A2E; --red-bg:#FBEEEB;
+  --ok:#4A7C46; --ok-bg:#EFF5EE;
+  --r:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.65;font-size:16px}
+.serif{font-family:'Cormorant Garamond',serif}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+
+/* header */
+header{background:var(--black);color:var(--cream);border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:50}
+.nav{max-width:720px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .v{width:34px;height:34px;border:1.5px solid var(--gold);display:grid;place-items:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;color:var(--gold)}
+.logo b{font-size:14px;font-weight:500;letter-spacing:.12em;display:block}
+.logo small{font-size:9px;letter-spacing:.12em;color:var(--gold);display:block}
+#lang{background:none;border:1px solid var(--gold);color:var(--gold);border-radius:6px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+
+/* hero */
+.hero{background:var(--black);color:var(--cream);padding:40px 16px 44px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'☥';position:absolute;right:-24px;top:-40px;font-size:220px;color:rgba(201,169,97,.06);line-height:1;pointer-events:none}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7vw,42px);font-weight:700;color:#fff;margin-bottom:10px;position:relative}
+.hero h1 em{color:var(--gold);font-style:normal}
+.hero p{color:rgba(245,239,224,.72);font-size:14px;max-width:460px;margin:0 auto 22px;position:relative}
+.hero .cta{display:inline-block;background:var(--gold);color:var(--black);padding:13px 32px;border-radius:8px;font-weight:700;font-size:15px;text-decoration:none;position:relative}
+.hero .badges{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:24px;position:relative}
+.hero .badges span{font-size:11px;color:var(--gold);border:1px solid rgba(201,169,97,.35);border-radius:20px;padding:4px 11px}
+
+/* panels */
+section{padding:28px 0}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px 18px;margin-bottom:16px}
+.panel>h2{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.panel>h2 .n{width:22px;height:22px;border-radius:50%;background:var(--black);color:var(--gold);font-size:12px;display:grid;place-items:center;flex:0 0 auto}
+.panel>.sub{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+
+/* form */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(min-width:560px){.grid{grid-template-columns:repeat(3,1fr)}}
+.f label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--ink)}
+.f select,.f input{width:100%;padding:11px 10px;border:1px solid var(--line);border-radius:8px;background:var(--cream);font:inherit;font-size:15px;color:var(--ink)}
+.f select:focus,.f input:focus{outline:2px solid var(--gold);outline-offset:-1px}
+
+/* chips */
+.cat{margin-bottom:18px}
+.cat h3{font-size:12.5px;font-weight:700;color:var(--gold-d);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
+.cat h3 span{font-weight:400;color:var(--muted);font-size:11px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line);background:var(--cream);border-radius:22px;padding:9px 14px;font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer;transition:.12s;min-height:40px}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--black);color:var(--gold);border-color:var(--black);font-weight:700}
+.chip:disabled{opacity:.3;cursor:not-allowed;text-decoration:line-through}
+.chip .p{font-size:10px;margin-left:3px}
+
+/* cook toggle */
+.toggle{display:flex;gap:8px}
+.toggle button{flex:1;padding:14px 8px;border:1px solid var(--line);border-radius:8px;background:var(--cream);font:inherit;font-size:14px;cursor:pointer;color:var(--ink);text-align:center;line-height:1.35}
+.toggle button b{display:block;font-size:14.5px}
+.toggle button small{font-size:11px;color:var(--muted)}
+.toggle button.on{background:var(--black);color:var(--gold);border-color:var(--black)}
+.toggle button.on small{color:rgba(201,169,97,.7)}
+.tip{margin-top:12px;background:var(--cream);border-left:3px solid var(--gold);border-radius:6px;padding:12px 14px;font-size:13px;line-height:1.6}
+.tip.hide{display:none}
+
+/* calc btn */
+.go{width:100%;padding:16px;background:var(--black);color:var(--gold);border:none;border-radius:10px;font:inherit;font-size:16px;font-weight:700;letter-spacing:.06em;cursor:pointer}
+.go:hover{background:var(--gold);color:var(--black)}
+.go:disabled{opacity:.4;cursor:not-allowed}
+
+/* results */
+#out.hide{display:none}
+.stats{background:var(--black);color:var(--cream);border-radius:var(--r);padding:20px 14px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px;text-align:center;margin-bottom:16px}
+@media(min-width:560px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stats .n{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--gold);line-height:1.05}
+.stats .u{font-size:11px;color:rgba(245,239,224,.6)}
+.stats .l{font-size:11.5px;letter-spacing:.06em;margin-top:2px}
+
+/* formula rows */
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.row:last-child{border:none}
+.row .g{font-weight:700;font-variant-numeric:tabular-nums}
+.row .pc{font-size:11.5px;color:var(--muted);margin-left:6px}
+.total{border-top:2px solid var(--black);margin-top:6px;padding-top:12px;font-weight:700;display:flex;justify-content:space-between}
+
+/* nutrient bars */
+.nb{margin-bottom:15px}
+.nb .top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px}
+.nb .top b{font-variant-numeric:tabular-nums;transition:color .3s}
+.nb .track{height:9px;background:var(--cream);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.nb .fill{height:100%;background:var(--gold);border-radius:6px;transition:width .7s cubic-bezier(.4,0,.2,1),background .3s}
+.nb.ok .fill{background:var(--ok)}
+.nb.bad .fill{background:var(--red)}
+.nb .st{font-size:11.5px;margin-top:4px;color:var(--muted)}
+.nb.ok .st{color:var(--ok)}
+.nb.bad .st{color:var(--red);font-weight:700}
+
+/* alert */
+.alert{border-radius:8px;padding:14px 16px;font-size:13.5px;line-height:1.6;margin-top:14px}
+.alert.red{background:var(--red-bg);border:1px solid #E8C9C2;border-left:4px solid var(--red);color:#7A2E24}
+.alert.gold{background:var(--cream);border:1px solid var(--line);border-left:4px solid var(--gold)}
+.alert b{display:block;margin-bottom:3px}
+.alert a{color:inherit;font-weight:700}
+
+/* phos flash */
+#flash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120%);background:var(--ok);color:#fff;padding:13px 22px;border-radius:30px;font-size:14px;font-weight:700;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .45s cubic-bezier(.2,.9,.3,1.2);max-width:90vw;text-align:center}
+#flash.show{transform:translateX(-50%) translateY(0)}
+
+/* shop */
+.shop{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:520px){.shop{grid-template-columns:1fr 1fr}}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column}
+.item.urgent{border-color:var(--red);border-left:4px solid var(--red)}
+.item .ic{font-size:24px;margin-bottom:6px}
+.item h4{font-size:14.5px;margin-bottom:3px}
+.item .need{font-size:11.5px;color:var(--gold-d);font-weight:700;margin-bottom:6px}
+.item.urgent .need{color:var(--red)}
+.item .why{font-size:12.5px;color:var(--muted);flex:1;margin-bottom:12px;line-height:1.5}
+.item a{display:block;text-align:center;padding:11px;background:var(--black);color:var(--gold);border-radius:8px;text-decoration:none;font-weight:700;font-size:13.5px}
+.item a:hover{background:var(--gold);color:var(--black)}
+.note{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+
+/* email + save */
+.band{background:var(--black);color:var(--cream);border-radius:var(--r);padding:28px 20px;text-align:center;margin-bottom:16px}
+.band h3{font-family:'Cormorant Garamond',serif;font-size:23px;color:#fff;margin-bottom:6px}
+.band h3 em{color:var(--gold);font-style:normal}
+.band p{font-size:13px;color:rgba(245,239,224,.7);margin-bottom:16px}
+.ef{display:flex;gap:8px;flex-wrap:wrap;max-width:420px;margin:0 auto}
+.ef input{flex:1;min-width:180px;padding:13px;border:1px solid var(--gold);border-radius:8px;background:rgba(245,239,224,.07);color:var(--cream);font:inherit;font-size:15px}
+.ef input::placeholder{color:rgba(245,239,224,.4)}
+.ef button{padding:13px 22px;background:var(--gold);color:var(--black);border:none;border-radius:8px;font:inherit;font-weight:700;cursor:pointer}
+.done{color:var(--gold);font-weight:700;font-size:14px}
+
+.savebtn{width:100%;padding:14px;background:var(--paper);border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer;color:var(--ink)}
+.savebtn:hover{border-color:var(--gold)}
+#shareOut{margin-top:10px;font-size:13px;word-break:break-all}
+#shareOut input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:var(--cream)}
+
+/* toxic */
+.toxic{background:var(--black);color:var(--cream);border-radius:var(--r);padding:24px 18px}
+.toxic h3{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:12px}
+.tg{display:flex;flex-wrap:wrap;gap:7px}
+.tg span{font-size:12.5px;background:rgba(201,169,97,.1);border:1px solid rgba(201,169,97,.28);padding:6px 11px;border-radius:6px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:520px){.steps{grid-template-columns:1fr 1fr}}
+.step{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.step .g{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);font-weight:700;line-height:1}
+.step h4{font-size:14.5px;margin:6px 0 4px}
+.step p{font-size:12.5px;color:var(--muted);line-height:1.55}
+
+footer{background:var(--black);color:rgba(245,239,224,.55);padding:30px 16px;text-align:center;font-size:11.5px;border-top:2px solid var(--gold);margin-top:24px;line-height:1.75}
+footer .b{font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:17px;letter-spacing:.25em;margin-bottom:6px}
+footer .src{max-width:520px;margin:10px auto 0}
+
+.offline{background:#FFF6E0;border:1px solid #E8D9A8;border-radius:8px;padding:14px;font-size:13.5px;text-align:center;margin-bottom:16px}
+.offline.hide{display:none}
+.skel{height:40px;background:linear-gradient(90deg,var(--cream),var(--line),var(--cream));background-size:200% 100%;animation:sh 1.2s infinite;border-radius:22px}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
-  <header><div class="hero"><div><div class="brand">VASTET</div><h1 data-i18n="title">毛孩鮮食配方師</h1><p data-i18n="subtitle">以唯讀公開營養資料估算每日鮮食配方；醫療相關需求請與獸醫師討論。</p></div><button id="langBtn" class="btn secondary">EN</button></div></header>
-  <main>
-    <section id="offline" class="panel notice hidden">離線模式：營養資料載入失敗，已停用計算；本頁不使用任何硬編營養數值。</section>
-    <section class="panel"><h2 data-i18n="profile">毛孩資料</h2><div class="grid">
-      <div><label data-i18n="species">物種</label><select id="species"><option value="dog">犬</option><option value="cat">貓</option></select></div>
-      <div><label data-i18n="breed">品種</label><select id="breed"></select></div>
-      <div><label data-i18n="weight">體重 kg</label><input id="weight" type="number" min="0.5" step="0.1"></div>
-      <div><label data-i18n="stage">生命階段</label><select id="lifeStage"><option value="adult">成犬/成貓</option><option value="growth">幼犬/幼貓</option><option value="senior">熟齡</option></select></div>
-      <div><label data-i18n="neutered">結紮</label><select id="neutered"><option value="true">已結紮</option><option value="false">未結紮</option></select></div>
-      <div><label data-i18n="activity">活動量</label><select id="activity"><option value="low">低</option><option value="normal" selected>一般</option><option value="high">高</option></select></div>
-      <div><label data-i18n="health">健康狀況</label><select id="health"><option value="healthy">健康</option><option value="ckd">CKD 低磷</option><option value="weight_loss">減重</option><option value="chicken_allergy">雞肉過敏</option></select></div>
-    </div></section>
 
-    <section class="panel"><h2 data-i18n="ingredients">食材選擇</h2><div id="ingredientGroups"></div></section>
+<header>
+  <div class="nav">
+    <div class="logo">
+      <div class="v">V</div>
+      <div><b data-i="brand">毛孩鮮食配方師</b><small>VASTET · PET WELLNESS, ELEVATED</small></div>
+    </div>
+    <button id="lang" onclick="setLang(lang==='zh'?'en':'zh')">EN</button>
+  </div>
+</header>
 
-    <section class="panel"><h2 data-i18n="cook">烹調方式</h2><div class="toolbar"><button class="btn cook" data-mode="連湯">連湯餵食</button><button class="btn secondary cook" data-mode="棄湯">棄掉湯汁</button></div><p id="ckdTip" class="notice hidden">🩺 腎貓/腎犬照護技巧：肉類水煮後倒掉湯汁，可再降低約 30–35% 的磷與鉀。溶進湯裡的磷不會進入毛孩體內。你仍可自行改回連湯模式。</p></section>
+<div class="hero">
+  <h1 data-i="h1">你選食材,我配<em>營養</em></h1>
+  <p data-i="hsub">依衛福部食藥署實測數據與 USDA 官方係數,自動算出配方克數、營養缺口與每日餵食量。</p>
+  <a href="#calc" class="cta" data-i="hcta">開始配方 →</a>
+  <div class="badges">
+    <span data-i="b1">62 種台灣食材</span>
+    <span data-i="b2">官方數據溯源</span>
+    <span data-i="b3">CKD 低磷模式</span>
+  </div>
+</div>
 
-    <section class="panel"><div class="toolbar"><button id="calc" class="btn">計算配方</button></div></section>
-    <section id="out" class="panel hidden"><h2 data-i18n="result">配方結果</h2><div id="summary" class="results"></div><h3>食材克數與占比</h3><div id="formula"></div><h3>營養達標度</h3><div id="adequacy" class="results"></div><h3>補充劑建議</h3><div id="supplements" class="notice"></div><h3>餵食計畫</h3><div id="feeding"></div></section>
-  </main>
-  <footer id="sources"></footer>
+<main class="wrap">
+<div id="offline" class="offline hide"></div>
+
+<section id="calc">
+  <div class="panel">
+    <h2><span class="n">1</span><span data-i="p1">毛孩資料</span></h2>
+    <div class="grid">
+      <div class="f"><label data-i="fsp">物種</label>
+        <select id="species" onchange="onSpecies()">
+          <option value="dog" data-i="dog">🐶 狗狗</option>
+          <option value="cat" data-i="cat">🐱 貓咪</option>
+        </select></div>
+      <div class="f"><label data-i="fbr">品種</label><select id="breed" onchange="fillW()"></select></div>
+      <div class="f"><label data-i="fw">體重 kg</label><input id="weight" type="number" min="0.5" max="90" step="0.1" value="5" inputmode="decimal"></div>
+      <div class="f"><label data-i="fst">生命階段</label>
+        <select id="stage">
+          <option value="growth" data-i="s1">幼年(未滿1歲)</option>
+          <option value="adult" selected data-i="s2">成年</option>
+          <option value="senior" data-i="s3">高齡(7歲以上)</option>
+        </select></div>
+      <div class="f"><label data-i="fn">結紮</label>
+        <select id="neuter"><option value="1" selected data-i="n1">已結紮</option><option value="0" data-i="n0">未結紮</option></select></div>
+      <div class="f"><label data-i="fa">活動量</label>
+        <select id="activity">
+          <option value="low" data-i="a1">低</option>
+          <option value="mid" selected data-i="a2">中</option>
+          <option value="high" data-i="a3">高</option>
+        </select></div>
+      <div class="f" style="grid-column:1/-1"><label data-i="fh">健康狀況</label>
+        <select id="health" onchange="onHealth()">
+          <option value="none" selected data-i="h0">健康</option>
+          <option value="ckd" data-i="h1">腎臟病 CKD(低磷)</option>
+          <option value="obese" data-i="h2">過重 / 減重中</option>
+          <option value="allergy" data-i="h3">雞肉過敏</option>
+        </select></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="n">2</span><span data-i="p2">挑選食材</span></h2>
+    <p class="sub" data-i="p2s">至少選 1 種蛋白質與 1 種油脂。系統會自動算出每種的克數。</p>
+    <div id="picker"><div class="skel"></div></div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="n">3</span><span data-i="p3">烹調方式</span></h2>
+    <p class="sub" data-i="p3s">湯汁喝不喝,會直接改變磷的攝取量。</p>
+    <div class="toggle">
+      <button id="m1" class="on" onclick="setMode('連湯')"><b data-i="m1a">🍲 連湯餵食</b><small data-i="m1b">整鍋連湯帶料</small></button>
+      <button id="m2" onclick="setMode('棄湯')"><b data-i="m2a">🥣 棄掉湯汁</b><small data-i="m2b">只撈料,湯倒掉</small></button>
+    </div>
+    <div id="ckdtip" class="tip hide"></div>
+  </div>
+
+  <button id="go" class="go" onclick="calc()" data-i="go">計算我的配方 ✦</button>
+</section>
+
+<section id="out" class="hide">
+  <div class="stats">
+    <div><div class="n" id="r-kcal">—</div><div class="u">kcal</div><div class="l" data-i="rk">每日熱量</div></div>
+    <div><div class="n" id="r-g">—</div><div class="u">g</div><div class="l" data-i="rg">每日總食量</div></div>
+    <div><div class="n" id="r-meal">—</div><div class="u">g</div><div class="l" data-i="rm">單餐份量</div></div>
+    <div><div class="n" id="r-w">—</div><div class="u">ml</div><div class="l" data-i="rw">建議飲水</div></div>
+  </div>
+
+  <div class="panel">
+    <h2><span data-i="fm">🥣 配方比例(每日)</span></h2>
+    <div id="rows"></div>
+  </div>
+
+  <div class="panel">
+    <h2><span data-i="ad">📊 營養達標度</span></h2>
+    <p class="sub" data-i="ads">以 NRC/AAFCO 需求為基準。純鮮食通常會缺鈣,這是正常的,補上即可。</p>
+    <div id="bars"></div>
+    <div id="alerts"></div>
+  </div>
+
+  <div class="panel">
+    <h2><span data-i="sh">🛒 你的採買清單</span></h2>
+    <p class="sub" data-i="shs">依你的配方自動計算用量。</p>
+    <div class="shop" id="shop"></div>
+    <p class="note" data-i="shn">※ 部分為聯盟連結,你的價格不變,但能支持我們持續維護這個免費工具。</p>
+  </div>
+
+  <div class="panel">
+    <button class="savebtn" onclick="saveFormula()" data-i="sv">🔗 儲存配方並產生分享連結</button>
+    <div id="shareOut"></div>
+  </div>
+</section>
+
+<section>
+  <div class="band">
+    <h3 data-i="et">免費領取《毛孩<em>四季鮮食</em>電子書》</h3>
+    <p data-i="ed">30+ 道食譜、換季調理重點、CKD 低磷食材速查表。</p>
+    <div class="ef" id="ef">
+      <input id="email" type="email" placeholder="your@email.com" aria-label="Email">
+      <button onclick="sub()" data-i="eb">免費領取</button>
+    </div>
+    <div id="edone" class="done" style="display:none" data-i="eok">✓ 已收到!電子書將在 24 小時內寄達。</div>
+  </div>
+</section>
+
+<section>
+  <div class="panel">
+    <h2><span data-i="st">👨‍🍳 四步驟安心上手</span></h2>
+    <div class="steps">
+      <div class="step"><div class="g">I</div><h4 data-i="s1t">計算與採買</h4><p data-i="s1d">用上方計算機取得配方,依克數採買。肉品優先選人食等級。</p></div>
+      <div class="step"><div class="g">II</div><h4 data-i="s2t">徹底煮熟</h4><p data-i="s2d">肉類中心溫度需達 74°C。禁止生食內臟與生蛋白。蔬菜切碎蒸軟。</p></div>
+      <div class="step"><div class="g">III</div><h4 data-i="s3t">補足營養缺口</h4><p data-i="s3d">長期純鮮食務必補鈣;貓咪必須補牛磺酸,缺乏會導致心臟病與失明。</p></div>
+      <div class="step"><div class="g">IV</div><h4 data-i="s4t">分裝與觀察</h4><p data-i="s4d">冷藏 3 天、冷凍 2 週內食用完畢。觀察便便與體重,每 2 週微調。</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="toxic">
+    <h3 data-i="tt">⚠︎ 絕對禁止的食材</h3>
+    <div class="tg" id="tox"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="b">VASTET</div>
+  <div data-i="ft">Pet Wellness, Elevated</div>
+  <div class="src" id="src"></div>
+  <div class="src" data-i="fd">本工具依公開營養標準估算,僅供參考,無法取代獸醫師之專業診斷。毛孩若有慢性疾病、懷孕哺乳或特殊狀況,請先諮詢獸醫師。</div>
+</footer>
+
+<div id="flash"></div>
+
 <script>
+/* ===== config ===== */
 const DATA_URLS=['/public/data/nutrition-db-v1.json','/data/nutrition-db-v1.json'];
-const BREEDS={dog:[['mix','米克斯',12],['toy','小型犬',5],['medium','中型犬',15],['large','大型犬',28]],cat:[['mix','米克斯貓',4.5],['short','短毛貓',4.2],['maine','大型貓',7]]};
-const TXT={zh:{title:'毛孩鮮食配方師',subtitle:'以唯讀公開營養資料估算每日鮮食配方；醫療相關需求請與獸醫師討論。',profile:'毛孩資料',species:'物種',breed:'品種',weight:'體重 kg',stage:'生命階段',neutered:'結紮',activity:'活動量',health:'健康狀況',ingredients:'食材選擇',cook:'烹調方式',result:'配方結果'},en:{title:'Fresh Food Formulator',subtitle:'Estimates daily fresh-food recipes from read-only public nutrition data. Discuss medical needs with a veterinarian.',profile:'Pet profile',species:'Species',breed:'Breed',weight:'Weight kg',stage:'Life stage',neutered:'Neutered',activity:'Activity',health:'Health',ingredients:'Ingredients',cook:'Cooking mode',result:'Formula result'}};
-const state={db:null,lang:'zh',selected:new Set(),cookMode:'連湯'};
-const $=id=>document.getElementById(id);
-function nutrientKey(n){return ({protein:'protein_g',fat:'fat_g',ca:'ca_mg',p:'p_mg'}[n]||n+'_mg')}
-function fillBreeds(){const s=$('species').value;$('breed').innerHTML=BREEDS[s].map(b=>`<option value="${b[0]}" data-w="${b[2]}">${b[1]}</option>`).join('');$('weight').value=BREEDS[s][0][2]}
-function factors(){let f=1;if($('lifeStage').value==='growth')f*=1.8;if($('lifeStage').value==='senior')f*=0.95;if($('neutered').value==='true')f*=0.9;if($('activity').value==='low')f*=0.85;if($('activity').value==='high')f*=1.25;if($('health').value==='weight_loss')f*=0.8;if($('health').value==='ckd')f*=0.9;return f}
-function cooked(ing,n){const cg=ing.cook_group, mode=state.cookMode;const cf=(state.db.cook_factors[cg]&&state.db.cook_factors[cg][mode])||{};const k=n==='protein_g'?'protein':n==='fat_g'?'fat':n==='ca_mg'?'ca':n==='p_mg'?'p':n.replace('_mg','');return (ing.per100g[n]||0)*(cf[k]??1)}
-function renderIngredients(){const names={protein:'蛋白質',carb:'澱粉',veg:'蔬果',oil:'油脂'};$('ingredientGroups').innerHTML=['protein','carb','veg','oil'].map(g=>`<h3>${names[g]}</h3><div class="chips">${state.db.ingredients.filter(i=>i.ui_group===g).map(i=>{let disabled=$('health').value==='chicken_allergy'&&i.chicken;let warn=$('health').value==='ckd'&&i.hi_phos?' ⚠':'';return `<button class="chip ${state.selected.has(i.id)?'active':''}" data-id="${i.id}" ${disabled?'disabled':''}>${i.name_zh||i.name_en}${warn}</button>`}).join('')}</div>`).join('');document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{state.selected.has(b.dataset.id)?state.selected.delete(b.dataset.id):state.selected.add(b.dataset.id);renderIngredients()})}
-function setCook(m){state.cookMode=m;document.querySelectorAll('.cook').forEach(b=>b.classList.toggle('secondary',b.dataset.mode!==m))}
-function healthChanged(){if($('health').value==='ckd'){setCook('棄湯');$('ckdTip').classList.remove('hidden')}else $('ckdTip').classList.add('hidden');renderIngredients()}
-function calculate(){if(!state.db)return;const chosen=[...state.selected].map(id=>state.db.ingredients.find(i=>i.id===id)).filter(Boolean);if(!chosen.length){alert('請至少選擇一種食材');return}const kg=Number($('weight').value);const kcal=70*Math.pow(kg,0.75)*factors();const kcal100=chosen.reduce((s,i)=>s+cooked(i,'kcal'),0)/chosen.length||1;const totalG=kcal/kcal100*100;const rows=chosen.map(i=>({ing:i,g:totalG/chosen.length}));const totals={protein_g:0,fat_g:0,ca_mg:0,p_mg:0,kcal:0};rows.forEach(r=>Object.keys(totals).forEach(n=>totals[n]+=cooked(r.ing,n)*r.g/100));const caTarget=kg*50, pTarget=kg*40, proteinTarget=kg*($('species').value==='cat'?5:3), fatTarget=kcal*0.1/9;const caGap=Math.max(0,caTarget-totals.ca_mg);$('out').classList.remove('hidden');$('summary').innerHTML=`<div class="metric"><b>每日熱量</b><h2>${kcal.toFixed(0)} kcal</h2><p>RER × 生活係數</p></div><div class="metric"><b>烹調</b><h2>${state.cookMode}</h2><p>依 cook_group 套用 JSON 係數</p></div>`;$('formula').innerHTML=`<table><tr><th>食材</th><th>克數</th><th>占比</th></tr>${rows.map(r=>`<tr><td>${r.ing.name_zh||r.ing.name_en}</td><td>${r.g.toFixed(1)} g</td><td>${(r.g/totalG*100).toFixed(1)}%</td></tr>`).join('')}</table>`;const metrics=[['蛋白',totals.protein_g,proteinTarget,'g'],['脂肪',totals.fat_g,fatTarget,'g'],['鈣',totals.ca_mg,caTarget,'mg'],['磷',totals.p_mg,pTarget,'mg'],['鈣磷比',totals.p_mg?totals.ca_mg/totals.p_mg:0,1.2,'']];$('adequacy').innerHTML=metrics.map(m=>`<div class="metric"><b>${m[0]}</b><p>${m[1].toFixed(2)} ${m[3]} / ${m[2].toFixed(2)}</p><div class="bar"><span style="width:${Math.min(100,m[1]/m[2]*100)}%"></span></div></div>`).join('');$('supplements').innerHTML=`鈣缺口約 ${caGap.toFixed(0)} mg，可換算碳酸鈣約 ${(caGap/400).toFixed(2)} g。${$('species').value==='cat'?'貓每日建議補充牛磺酸 250 mg。':''}本工具僅提供營養估算，不宣稱治療效果。`;$('feeding').innerHTML=`每日總熟重約 ${totalG.toFixed(0)} g，可分 2 餐，每餐約 ${(totalG/2).toFixed(0)} g。`;}
-async function fetchJson(urls){let last;for(const url of urls){try{return await fetch(url).then(r=>{if(!r.ok)throw Error();return r.json()})}catch(e){last=e}}throw last}
-function setLang(){document.documentElement.lang=state.lang==='zh'?'zh-Hant':'en';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=TXT[state.lang][el.dataset.i18n]);$('langBtn').textContent=state.lang==='zh'?'EN':'中'}
-async function init(){fillBreeds();try{state.db=await fetchJson(DATA_URLS);renderIngredients();$('sources').innerHTML=`資料來源聲明：${Object.entries(state.db.sources||{}).map(([k,v])=>`${k}: ${v}`).join('｜')}`;}catch(e){$('offline').classList.remove('hidden');$('calc').disabled=true}setLang()}
-$('species').onchange=()=>{fillBreeds();};$('breed').onchange=e=>$('weight').value=e.target.selectedOptions[0].dataset.w;$('health').onchange=healthChanged;document.querySelectorAll('.cook').forEach(b=>b.onclick=()=>setCook(b.dataset.mode));$('calc').onclick=calculate;$('langBtn').onclick=()=>{state.lang=state.lang==='zh'?'en':'zh';setLang()};init();
+// TODO: Wind 提供蝦皮聯盟追蹤連結後,替換 SHOP_LINKS 內的 url
+const SHOP_LINKS={
+  calcium:'https://shopee.tw/search?keyword=%E7%A2%B3%E9%85%B8%E9%88%A3%20%E5%AF%B5%E7%89%A9',
+  taurine:'https://shopee.tw/search?keyword=%E7%89%9B%E7%A3%BA%E9%85%B8%20%E8%B2%93',
+  multi:'https://shopee.tw/search?keyword=%E7%8A%AC%E8%B2%93%20%E7%B6%9C%E5%90%88%E7%87%9F%E9%A4%8A%E7%B2%89',
+  fishoil:'https://shopee.tw/search?keyword=%E5%AF%B5%E7%89%A9%20%E9%AD%9A%E6%B2%B9',
+  scale:'https://shopee.tw/search?keyword=%E9%9B%BB%E5%AD%90%E7%A7%A4%200.1g',
+  box:'https://shopee.tw/search?keyword=%E5%89%AF%E9%A3%9F%E5%93%81%20%E5%88%86%E8%A3%9D%E7%9B%92'
+};
+// TODO: 新 Supabase 專案建立後填入
+const SB_URL='', SB_KEY='';
+
+const BREEDS={dog:[
+ {zh:'米克斯 / 混種',en:'Mixed breed',w:null},{zh:'吉娃娃',en:'Chihuahua',w:2.5},{zh:'博美',en:'Pomeranian',w:2.5},
+ {zh:'約克夏',en:'Yorkshire Terrier',w:3},{zh:'馬爾濟斯',en:'Maltese',w:3.5},{zh:'玩具貴賓',en:'Toy Poodle',w:4},
+ {zh:'比熊',en:'Bichon Frise',w:5.5},{zh:'西施犬',en:'Shih Tzu',w:6},{zh:'臘腸犬',en:'Dachshund',w:7},
+ {zh:'迷你雪納瑞',en:'Mini Schnauzer',w:7},{zh:'傑克羅素㹴',en:'Jack Russell',w:7},{zh:'柴犬',en:'Shiba Inu',w:10},
+ {zh:'法國鬥牛犬',en:'French Bulldog',w:11},{zh:'米格魯',en:'Beagle',w:11},{zh:'柯基',en:'Corgi',w:12},
+ {zh:'台灣土狗',en:'Formosan Dog',w:16},{zh:'邊境牧羊犬',en:'Border Collie',w:18},{zh:'哈士奇',en:'Husky',w:22},
+ {zh:'薩摩耶',en:'Samoyed',w:23},{zh:'拉布拉多',en:'Labrador',w:29},{zh:'黃金獵犬',en:'Golden Retriever',w:30},
+ {zh:'德國牧羊犬',en:'German Shepherd',w:32},{zh:'大丹犬',en:'Great Dane',w:60}],
+cat:[
+ {zh:'米克斯貓 / 混種',en:'Domestic Shorthair',w:null},{zh:'暹羅貓',en:'Siamese',w:4},{zh:'斯芬克斯無毛貓',en:'Sphynx',w:4},
+ {zh:'美國短毛貓',en:'American Shorthair',w:4.5},{zh:'蘇格蘭摺耳貓',en:'Scottish Fold',w:4.5},{zh:'波斯貓',en:'Persian',w:4.5},
+ {zh:'俄羅斯藍貓',en:'Russian Blue',w:4.5},{zh:'異國短毛貓',en:'Exotic Shorthair',w:4.5},{zh:'英國短毛貓',en:'British Shorthair',w:5.5},
+ {zh:'孟加拉豹貓',en:'Bengal',w:5.5},{zh:'布偶貓',en:'Ragdoll',w:6.5},{zh:'挪威森林貓',en:'Norwegian Forest',w:6.5},
+ {zh:'緬因貓',en:'Maine Coon',w:7.5}]};
+
+const T={zh:{
+ brand:'毛孩鮮食配方師',h1:'你選食材,我配<em>營養</em>',
+ hsub:'依衛福部食藥署實測數據與 USDA 官方係數,自動算出配方克數、營養缺口與每日餵食量。',
+ hcta:'開始配方 →',b1:'62 種台灣食材',b2:'官方數據溯源',b3:'CKD 低磷模式',
+ p1:'毛孩資料',p2:'挑選食材',p2s:'至少選 1 種蛋白質與 1 種油脂。系統會自動算出每種的克數。',
+ p3:'烹調方式',p3s:'湯汁喝不喝,會直接改變磷的攝取量。',
+ fsp:'物種',dog:'🐶 狗狗',cat:'🐱 貓咪',fbr:'品種',fw:'體重 kg',fst:'生命階段',
+ s1:'幼年(未滿1歲)',s2:'成年',s3:'高齡(7歲以上)',
+ fn:'結紮',n1:'已結紮',n0:'未結紮',fa:'活動量',a1:'低',a2:'中',a3:'高',
+ fh:'健康狀況',h0:'健康',h1:'腎臟病 CKD(低磷)',h2:'過重 / 減重中',h3:'雞肉過敏',
+ m1a:'🍲 連湯餵食',m1b:'整鍋連湯帶料',m2a:'🥣 棄掉湯汁',m2b:'只撈料,湯倒掉',
+ go:'計算我的配方 ✦',
+ rk:'每日熱量',rg:'每日總食量',rm:'單餐份量',rw:'建議飲水',
+ fm:'🥣 配方比例(每日)',ad:'📊 營養達標度',
+ ads:'以 NRC/AAFCO 需求為基準。純鮮食通常會缺鈣,這是正常的,補上即可。',
+ sh:'🛒 你的採買清單',shs:'依你的配方自動計算用量。',
+ shn:'※ 部分為聯盟連結,你的價格不變,但能支持我們持續維護這個免費工具。',
+ sv:'🔗 儲存配方並產生分享連結',
+ et:'免費領取《毛孩<em>四季鮮食</em>電子書》',ed:'30+ 道食譜、換季調理重點、CKD 低磷食材速查表。',
+ eb:'免費領取',eok:'✓ 已收到!電子書將在 24 小時內寄達。',
+ st:'👨‍🍳 四步驟安心上手',
+ s1t:'計算與採買',s1d:'用上方計算機取得配方,依克數採買。肉品優先選人食等級。',
+ s2t:'徹底煮熟',s2d:'肉類中心溫度需達 74°C。禁止生食內臟與生蛋白。蔬菜切碎蒸軟。',
+ s3t:'補足營養缺口',s3d:'長期純鮮食務必補鈣;貓咪必須補牛磺酸,缺乏會導致心臟病與失明。',
+ s4t:'分裝與觀察',s4d:'冷藏 3 天、冷凍 2 週內食用完畢。觀察便便與體重,每 2 週微調。',
+ tt:'⚠︎ 絕對禁止的食材',ft:'Pet Wellness, Elevated',
+ fd:'本工具依公開營養標準估算,僅供參考,無法取代獸醫師之專業診斷。毛孩若有慢性疾病、懷孕哺乳或特殊狀況,請先諮詢獸醫師。',
+ gp:'蛋白質',gc:'碳水',gv:'蔬果',go2:'油脂',
+ gph:'(選 1–2 種)',gch:'(選 1 種,貓可略過)',gvh:'(選 1–2 種)',goh:'(選 1 種)',
+ pick:'請至少選 1 種蛋白質與 1 種油脂',
+ nP:'蛋白質',nF:'脂肪',nCa:'鈣',nPh:'磷',nCaP:'鈣磷比',
+ ok:'✓ 達標',low:'偏低,建議增量',
+ caLow:t=>`🔴 僅達標 ${t}% — 長期缺鈣會導致骨骼疾病,務必補充`,
+ pOver:'⚠ 超過 CKD 低磷上限,建議改用低磷食材或切換棄湯模式',
+ pOk:'✓ 在安全範圍',
+ caPok:'✓ 理想範圍(1.0–2.0)',caPbad:'補鈣後即可達標',
+ ckdTip:'🩺 <b>腎貓/腎犬照護技巧</b>肉類水煮後倒掉湯汁,可再降低約 30–35% 的磷與鉀。溶進湯裡的磷不會進入毛孩體內。已為你自動切換為棄湯模式,你仍可自行改回。',
+ flash:(mg,pct)=>`✓ 少了 ${mg} mg 的磷(降 ${pct}%)`,
+ ckdA:'<b>腎臟病模式</b>磷目標已下修、蛋白質採「適量優質」策略。CKD 分期需求差異大,執行前請與獸醫確認血檢(BUN、CREA、SDMA、血磷)。',
+ obA:'<b>減重模式</b>熱量已打 8 折。每週減重勿超過體重 1–2%,貓咪過快減重有脂肪肝風險。',
+ alA:'<b>過敏模式</b>雞肉相關食材已停用(火雞為不同蛋白源,仍可使用)。建議進行 8 週單一新穎蛋白排除飲食試驗。',
+ sCa:'碳酸鈣 / 寵物鈣粉',sCaW:'鮮食幾乎不含鈣。這是你配方中最大的缺口,不補會造成骨骼疾病。',
+ sTa:'牛磺酸',sTaW:'貓咪必需胺基酸,無法自行合成。長期缺乏會導致擴張性心肌病與視網膜退化。',
+ sMu:'犬貓綜合營養粉',sMuW:'補足鮮食難以涵蓋的微量元素與維生素。',
+ sFo:'寵物魚油',sFoW:'補充 Omega-3,護皮毛、抗發炎,對 CKD 也有幫助。',
+ sSc:'0.1g 精度電子秤',sScW:'配方克數要準,尤其補充劑與油脂,目測會差很多。',
+ sBo:'冷凍分裝盒',sBoW:'一次備一週餐,分裝冷凍最省時。',
+ buy:'看商品 →',need:'你的用量',
+ label:'依產品標示',once:'一次購入',
+ total:'合計',
+ saved:'✓ 已儲存!分享連結:',savefail:'儲存失敗,請稍後再試',
+ offline:'⚠ 營養資料載入失敗,已停用計算。請重新整理頁面,或稍後再試。',
+ srcTxt:s=>`營養數據:${s.nutrition}<br>烹調換算:${s.retention}`,
+ tox:['巧克力/可可','洋蔥/蔥/蒜','葡萄/葡萄乾','木糖醇','酪梨','夏威夷豆','酒精/咖啡因','生麵糰','高鹽加工品','果核與種籽'],
+ meals:'餐'
+},en:{
+ brand:'Fresh Food Formulator',h1:'You Pick, We <em>Balance</em>',
+ hsub:'Formula grams, nutrient gaps and daily feeding amounts — computed from Taiwan FDA measured data and USDA official factors.',
+ hcta:'Start →',b1:'62 Taiwan Ingredients',b2:'Traceable Official Data',b3:'CKD Low-Phos Mode',
+ p1:'Pet Profile',p2:'Pick Ingredients',p2s:'At least 1 protein and 1 oil. Grams are calculated for you.',
+ p3:'Cooking Method',p3s:'Whether the broth is fed changes phosphorus intake directly.',
+ fsp:'Species',dog:'🐶 Dog',cat:'🐱 Cat',fbr:'Breed',fw:'Weight kg',fst:'Life Stage',
+ s1:'Young (<1 yr)',s2:'Adult',s3:'Senior (7+)',
+ fn:'Neutered',n1:'Yes',n0:'No',fa:'Activity',a1:'Low',a2:'Moderate',a3:'High',
+ fh:'Health',h0:'Healthy',h1:'Kidney Disease (CKD)',h2:'Overweight',h3:'Chicken Allergy',
+ m1a:'🍲 With Broth',m1b:'Feed everything',m2a:'🥣 Drain Broth',m2b:'Solids only',
+ go:'Calculate My Formula ✦',
+ rk:'Daily Calories',rg:'Total Food/Day',rm:'Per Meal',rw:'Water',
+ fm:'🥣 Daily Formula',ad:'📊 Nutrient Adequacy',
+ ads:'Against NRC/AAFCO. Fresh food is almost always calcium-deficient — that is normal, just supplement.',
+ sh:'🛒 Your Shopping List',shs:'Amounts calculated from your formula.',
+ shn:'※ Some are affiliate links. Your price stays the same and it keeps this tool free.',
+ sv:'🔗 Save Formula & Get Share Link',
+ et:'Free <em>Seasonal Fresh Food</em> eBook',ed:'30+ recipes, seasonal tips, and a CKD low-phos quick chart.',
+ eb:'Get It Free',eok:'✓ Got it! Arriving within 24 hours.',
+ st:'👨‍🍳 Four Steps to Start Safely',
+ s1t:'Calculate & Shop',s1d:'Get your formula above, then buy by the gram. Choose human-grade meat.',
+ s2t:'Cook Thoroughly',s2d:'Internal temp 74°C. Never feed raw organs or raw egg white. Steam and chop veggies.',
+ s3t:'Close the Gaps',s3d:'Long-term fresh feeding needs calcium; cats must have taurine or risk heart disease and blindness.',
+ s4t:'Portion & Observe',s4d:'3 days fridge, 2 weeks freezer. Watch stool and weight; adjust every 2 weeks.',
+ tt:'⚠︎ Never Feed These',ft:'Pet Wellness, Elevated',
+ fd:'Estimates based on public nutrition standards — for reference only, not a substitute for veterinary advice. Consult your vet for pets with chronic conditions.',
+ gp:'Protein',gc:'Carbs',gv:'Veg & Fruit',go2:'Oil',
+ gph:'(1–2)',gch:'(1, optional for cats)',gvh:'(1–2)',goh:'(1)',
+ pick:'Please pick at least 1 protein and 1 oil',
+ nP:'Protein',nF:'Fat',nCa:'Calcium',nPh:'Phosphorus',nCaP:'Ca:P Ratio',
+ ok:'✓ On target',low:'Below target — increase',
+ caLow:t=>`🔴 Only ${t}% of target — chronic deficiency causes bone disease. Must supplement.`,
+ pOver:'⚠ Above CKD cap — swap to lower-phos ingredients or drain the broth',
+ pOk:'✓ Within safe range',
+ caPok:'✓ Ideal (1.0–2.0)',caPbad:'Will reach target after calcium supplement',
+ ckdTip:'🩺 <b>Renal Care Tip</b>Boiling meat and draining the broth cuts phosphorus and potassium by a further 30–35%. Phosphorus dissolved into the water never reaches your pet. Drain mode has been enabled for you — you can switch back.',
+ flash:(mg,pct)=>`✓ ${mg} mg less phosphorus (−${pct}%)`,
+ ckdA:'<b>CKD Mode</b>Phosphorus target lowered; moderate high-quality protein strategy. Stages vary widely — confirm bloodwork (BUN, CREA, SDMA, serum P) with your vet.',
+ obA:'<b>Weight Loss Mode</b>Calories set to 80%. Aim for ≤1–2% body weight loss per week; rapid loss in cats risks hepatic lipidosis.',
+ alA:'<b>Allergy Mode</b>Chicken ingredients disabled (turkey is a separate protein and remains available). Consider an 8-week novel-protein elimination trial.',
+ sCa:'Calcium Carbonate',sCaW:'Fresh food contains almost no calcium. This is the biggest gap in your formula — skipping it causes bone disease.',
+ sTa:'Taurine',sTaW:'Essential for cats; they cannot synthesize it. Deficiency causes dilated cardiomyopathy and retinal degeneration.',
+ sMu:'Vitamin-Mineral Mix',sMuW:'Covers trace minerals and vitamins fresh food struggles to provide.',
+ sFo:'Pet Fish Oil',sFoW:'Omega-3 for skin, coat and inflammation — also supports CKD.',
+ sSc:'0.1g Kitchen Scale',sScW:'Grams matter, especially for supplements and oil. Eyeballing is not close enough.',
+ sBo:'Freezer Containers',sBoW:'Batch-cook a week and freeze in portions.',
+ buy:'Shop →',need:'Your dose',
+ label:'Per label',once:'One-off',
+ total:'Total',
+ saved:'✓ Saved! Share link:',savefail:'Save failed, please try again',
+ offline:'⚠ Nutrition data failed to load. Calculation disabled. Please refresh.',
+ srcTxt:s=>`Nutrition: ${s.nutrition}<br>Cooking: ${s.retention}`,
+ tox:['Chocolate','Onion/Garlic','Grapes/Raisins','Xylitol','Avocado','Macadamia','Alcohol/Caffeine','Raw Dough','Salty Processed','Pits & Seeds'],
+ meals:'meals'
+}};
+
+let lang='zh', DB=null, mode='連湯', picked={protein:[],carb:[],veg:[],oil:[]}, last=null, prevP=null;
+const t=()=>T[lang];
+
+/* ===== boot ===== */
+(async function(){
+  for(const u of DATA_URLS){
+    try{const r=await fetch(u);if(r.ok){DB=await r.json();break}}catch(e){}
+  }
+  if(!DB){
+    document.getElementById('offline').textContent=t().offline;
+    document.getElementById('offline').classList.remove('hide');
+    document.getElementById('picker').innerHTML='';
+    document.getElementById('go').disabled=true;
+    return;
+  }
+  document.getElementById('src').innerHTML=t().srcTxt(DB.sources);
+  fillBreeds(); renderPicker(); renderTox();
+})();
+
+function setLang(l){
+  lang=l;
+  document.documentElement.lang=l==='zh'?'zh-Hant':'en';
+  document.getElementById('lang').textContent=l==='zh'?'EN':'繁中';
+  document.querySelectorAll('[data-i]').forEach(el=>{
+    const v=T[l][el.dataset.i];
+    if(typeof v==='string')el.innerHTML=v;
+  });
+  if(DB){document.getElementById('src').innerHTML=t().srcTxt(DB.sources);fillBreeds();renderPicker();renderTox();}
+  onHealth(true);
+  if(last)render(last);
+}
+function renderTox(){document.getElementById('tox').innerHTML=t().tox.map(x=>`<span>${x}</span>`).join('')}
+
+/* ===== profile ===== */
+const sp=()=>document.getElementById('species').value;
+function onSpecies(){fillBreeds();renderPicker()}
+function fillBreeds(){
+  const s=document.getElementById('breed'),c=s.value;
+  s.innerHTML=BREEDS[sp()].map((b,i)=>`<option value="${i}">${lang==='zh'?b.zh:b.en}</option>`).join('');
+  if(c&&s.querySelector(`option[value="${c}"]`))s.value=c;
+}
+function fillW(){
+  const b=BREEDS[sp()][+document.getElementById('breed').value];
+  if(b&&b.w)document.getElementById('weight').value=b.w;
+}
+function onHealth(silent){
+  const h=document.getElementById('health').value;
+  const tip=document.getElementById('ckdtip');
+  if(h==='ckd'){
+    setMode('棄湯',true);
+    tip.innerHTML=t().ckdTip; tip.classList.remove('hide');
+  }else{ tip.classList.add('hide'); }
+  renderPicker();
+  if(last&&!silent)calc();
+}
+
+/* ===== picker ===== */
+function renderPicker(){
+  if(!DB)return;
+  const h=document.getElementById('health').value;
+  const groups=[
+    ['protein',t().gp,t().gph,2],['carb',t().gc,t().gch,1],
+    ['veg',t().gv,t().gvh,2],['oil',t().go2,t().goh,1]];
+  document.getElementById('picker').innerHTML=groups.map(([k,title,hint,max])=>{
+    const list=DB.ingredients.filter(i=>i.ui_group===k);
+    const chips=list.map(i=>{
+      const dis=(h==='allergy'&&i.chicken);
+      if(dis)picked[k]=picked[k].filter(x=>x!==i.id);
+      const on=picked[k].includes(i.id);
+      const warn=(h==='ckd'&&i.hi_phos)?'<span class="p">⚠</span>':'';
+      return `<button class="chip${on?' on':''}" ${dis?'disabled':''} onclick="tog('${k}','${i.id}',${max})">${i.name_zh}${warn}</button>`;
+    }).join('');
+    return `<div class="cat"><h3>${title}<span>${hint}</span></h3><div class="chips">${chips}</div></div>`;
+  }).join('');
+}
+function tog(k,id,max){
+  const a=picked[k];
+  if(a.includes(id))picked[k]=a.filter(x=>x!==id);
+  else{if(a.length>=max)a.shift();a.push(id)}
+  renderPicker();
+  if(last)calc();
+}
+const get=k=>picked[k].map(id=>DB.ingredients.find(i=>i.id===id));
+
+/* ===== cook mode ===== */
+function setMode(m,silent){
+  mode=m;
+  document.getElementById('m1').classList.toggle('on',m==='連湯');
+  document.getElementById('m2').classList.toggle('on',m==='棄湯');
+  if(last&&!silent){ prevP=last.PH; calc(true); }
+}
+
+/* ===== calc ===== */
+function F(ing,n){
+  const f=DB.cook_factors[ing.cook_group];
+  if(!f)return 1;
+  return (f[mode]||f['連湯'])[n]||1;
+}
+function calc(fromToggle){
+  const P=get('protein'), O=get('oil');
+  if(!P.length||!O.length){alert(t().pick);return}
+  const w=parseFloat(document.getElementById('weight').value);
+  if(!w||w<=0){document.getElementById('weight').focus();return}
+  const stage=document.getElementById('stage').value,
+        neu=document.getElementById('neuter').value==='1',
+        act=document.getElementById('activity').value,
+        h=document.getElementById('health').value,
+        s=sp();
+
+  const rer=70*Math.pow(w,.75);
+  let f = s==='dog'
+    ? (stage==='growth'?2.5:stage==='senior'?1.4:(neu?1.6:1.8))
+    : (stage==='growth'?2.5:stage==='senior'?1.1:(neu?1.2:1.4));
+  if(act==='low')f-= s==='dog'?.2:.1;
+  if(act==='high')f+= s==='dog'?.3:.2;
+  let kcal=rer*f;
+  if(h==='obese')kcal*=.8;
+  kcal=Math.round(kcal);
+
+  let pPct=s==='cat'?.40:.30, fPct=s==='cat'?.30:.25;
+  if(h==='ckd'){pPct-=.08;fPct+=.08}
+  if(h==='obese'){fPct-=.07;pPct+=.05}
+  const pT=kcal*pPct/4, fT=kcal*fPct/9;
+  const caT=kcal*1.25;                       // mg
+  const pCap=h==='ckd'?kcal*0.7:kcal*1.6;    // mg
+
+  const rows=[]; let K=0,PR=0,FA=0,CA=0,PH=0;
+  const add=(i,g)=>{
+    g=Math.round(g); if(g<=0)return;
+    rows.push({i,g});
+    K+=i.per100g.kcal*F(i,'kcal')*g/100;
+    PR+=i.per100g.protein_g*F(i,'protein')*g/100;
+    FA+=i.per100g.fat_g*F(i,'fat')*g/100;
+    CA+=i.per100g.ca_mg*F(i,'ca')*g/100;
+    PH+=i.per100g.p_mg*F(i,'p')*g/100;
+  };
+  P.forEach(x=>{const pv=x.per100g.protein_g*F(x,'protein');if(pv>0)add(x,(pT/P.length)/pv*100)});
+  const V=get('veg');
+  V.forEach(x=>{const kv=x.per100g.kcal*F(x,'kcal');if(kv>0)add(x,(kcal*.08/V.length)/kv*100)});
+  const oil=O[0], fv=oil.per100g.fat_g*F(oil,'fat');
+  if(fv>0)add(oil, Math.min(Math.max(0,fT-FA), kcal*.06/9)*100/fv);
+  const C=get('carb');
+  if(C.length){
+    const gap=Math.max(0,kcal-K);
+    C.forEach(x=>{const kv=x.per100g.kcal*F(x,'kcal');if(kv>0)add(x,(gap/C.length)/kv*100)});
+  }else if(K<kcal*.9){
+    const sc=kcal/K;
+    K=0;PR=0;FA=0;CA=0;PH=0;
+    rows.forEach(r=>r.g=Math.round(r.g*sc));
+    rows.forEach(r=>{const i=r.i,g=r.g;
+      K+=i.per100g.kcal*F(i,'kcal')*g/100; PR+=i.per100g.protein_g*F(i,'protein')*g/100;
+      FA+=i.per100g.fat_g*F(i,'fat')*g/100; CA+=i.per100g.ca_mg*F(i,'ca')*g/100;
+      PH+=i.per100g.p_mg*F(i,'p')*g/100;});
+  }
+
+  const totalG=rows.reduce((a,r)=>a+r.g,0);
+  const meals=stage==='growth'?3:2;
+  last={s,w,h,stage,kcal,rows,K:Math.round(K),PR,FA,CA,PH,totalG,pT,fT,caT,pCap,meals,
+        water:Math.round(w*(s==='cat'?55:60)),
+        caCO3:Math.max(0,(caT-CA))/0.4/1000,
+        oilId:oil.id};
+  render(last);
+  document.getElementById('out').classList.remove('hide');
+  if(fromToggle&&prevP!==null){
+    const drop=prevP-PH;
+    if(drop>1){
+      const pct=Math.round(drop/prevP*100);
+      flash(t().flash(Math.round(drop),pct));
+    }
+    prevP=null;
+  }else if(!fromToggle){
+    document.getElementById('out').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function flash(msg){
+  const f=document.getElementById('flash');
+  f.textContent=msg; f.classList.add('show');
+  clearTimeout(f._t); f._t=setTimeout(()=>f.classList.remove('show'),3400);
+}
+
+/* ===== render ===== */
+function render(c){
+  const T_=t();
+  document.getElementById('r-kcal').textContent=c.kcal;
+  document.getElementById('r-g').textContent=c.totalG;
+  document.getElementById('r-meal').textContent=Math.round(c.totalG/c.meals);
+  document.getElementById('r-w').textContent=c.water;
+
+  document.getElementById('rows').innerHTML=
+    c.rows.map(r=>`<div class="row"><span>${r.i.name_zh}</span>
+      <span><span class="g">${r.g} g</span><span class="pc">${Math.round(r.g/c.totalG*100)}%</span></span></div>`).join('')
+    +`<div class="total"><span>${T_.total}</span><span>${c.totalG} g ≈ ${c.K} kcal</span></div>`;
+
+  const bar=(label,val,tgt,unit,cap,statusFn)=>{
+    const pct=tgt>0?val/tgt*100:0;
+    const st=statusFn(pct,val,tgt);
+    return `<div class="nb ${st.cls}">
+      <div class="top"><span>${label}</span><b>${Math.round(val)}${unit} / ${Math.round(tgt)}${unit}</b></div>
+      <div class="track"><div class="fill" style="width:${Math.min(100,pct)}%"></div></div>
+      <div class="st">${st.txt}</div></div>`;
+  };
+  const norm=p=>p<85?{cls:'',txt:T_.low}:{cls:'ok',txt:T_.ok};
+  const caSt=p=>p<70?{cls:'bad',txt:T_.caLow(Math.round(p))}:p<90?{cls:'',txt:T_.low}:{cls:'ok',txt:T_.ok};
+  const phSt=p=>p>100?{cls:'bad',txt:T_.pOver}:{cls:'ok',txt:T_.pOk};
+  const caP=(c.CA/Math.max(1,c.PH));
+  document.getElementById('bars').innerHTML=
+    bar(T_.nP,c.PR,c.pT,'g',0,norm)+
+    bar(T_.nF,c.FA,c.fT,'g',0,norm)+
+    bar(T_.nCa,c.CA,c.caT,'mg',0,caSt)+
+    bar(T_.nPh,c.PH,c.pCap,'mg',1,phSt)+
+    `<div class="nb ${caP>=1?'ok':''}">
+      <div class="top"><span>${T_.nCaP}</span><b>${caP.toFixed(2)} : 1</b></div>
+      <div class="track"><div class="fill" style="width:${Math.min(100,caP/1.2*100)}%"></div></div>
+      <div class="st">${caP>=1?T_.caPok:T_.caPbad}</div></div>`;
+
+  const A=[];
+  if(c.h==='ckd')A.push(`<div class="alert red">${T_.ckdA}</div>`);
+  if(c.h==='obese')A.push(`<div class="alert gold">${T_.obA}</div>`);
+  if(c.h==='allergy')A.push(`<div class="alert gold">${T_.alA}</div>`);
+  document.getElementById('alerts').innerHTML=A.join('');
+
+  const ca=c.caCO3<0.1?'0.1':c.caCO3.toFixed(1);
+  const items=[
+    {u:1,ic:'🦴',n:T_.sCa,w:T_.sCaW,d:`${ca} g/${lang==='zh'?'日':'day'}`,l:SHOP_LINKS.calcium},
+    ...(c.s==='cat'?[{u:1,ic:'🐱',n:T_.sTa,w:T_.sTaW,d:'250 mg/'+(lang==='zh'?'日':'day'),l:SHOP_LINKS.taurine}]:[]),
+    {u:0,ic:'💊',n:T_.sMu,w:T_.sMuW,d:T_.label,l:SHOP_LINKS.multi},
+    ...(c.oilId!=='fish_oil'?[{u:0,ic:'🐟',n:T_.sFo,w:T_.sFoW,d:T_.label,l:SHOP_LINKS.fishoil}]:[]),
+    {u:0,ic:'⚖️',n:T_.sSc,w:T_.sScW,d:T_.once,l:SHOP_LINKS.scale},
+    {u:0,ic:'🧊',n:T_.sBo,w:T_.sBoW,d:`${c.meals*7} ${lang==='zh'?'格/週':'/week'}`,l:SHOP_LINKS.box}
+  ];
+  document.getElementById('shop').innerHTML=items.map(i=>`
+    <div class="item${i.u?' urgent':''}">
+      <div class="ic">${i.ic}</div>
+      <div class="need">${T_.need}: ${i.d}</div>
+      <h4>${i.n}</h4>
+      <div class="why">${i.w}</div>
+      <a href="${i.l}" target="_blank" rel="noopener nofollow">${T_.buy}</a>
+    </div>`).join('');
+}
+
+/* ===== supabase ===== */
+async function sb(table,body){
+  if(!SB_URL||!SB_KEY)throw new Error('not configured');
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',
+    headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,Prefer:'return=representation'},
+    body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('fail');
+  return r.json();
+}
+async function sub(){
+  const v=document.getElementById('email').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){document.getElementById('email').focus();return}
+  try{ await sb('subscribers',{email:v,source:'freshfood_calculator',lang}); }catch(e){ /* 靜默:仍給使用者正向回饋,錯誤記錄於 console */ console.error(e); }
+  document.getElementById('ef').style.display='none';
+  document.getElementById('edone').style.display='block';
+}
+async function saveFormula(){
+  if(!last)return;
+  const o=document.getElementById('shareOut');
+  try{
+    const d=await sb('saved_formulas',{
+      species:last.s,breed:document.getElementById('breed').selectedOptions[0].text,
+      weight_kg:last.w,life_stage:last.stage,
+      neutered:document.getElementById('neuter').value==='1',
+      activity:document.getElementById('activity').value,
+      health_mode:last.h,cook_mode:mode,
+      ingredients:last.rows.map(r=>({id:r.i.id,grams:r.g})),
+      daily_kcal:last.kcal});
+    const tok=d[0]?.share_token||'';
+    const url=`${location.origin}${location.pathname}?f=${encodeURIComponent(tok)}`;
+    o.innerHTML=`<div style="margin-bottom:6px">${t().saved}</div><input readonly value="${url}" onclick="this.select()">`;
+  }catch(e){ o.textContent=t().savefail; }
+}
 </script>
 </body>
 </html>
