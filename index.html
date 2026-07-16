@@ -280,6 +280,20 @@ footer .src{max-width:520px;margin:10px auto 0}
   </div>
 
   <div class="panel">
+    <h2><span data-i="pxh">➕ 另外添加(起鍋放涼後拌入)</span></h2>
+    <p class="sub" data-i="pxs">魚油、鈣粉、綜合維生素、牛磺酸等補充品不進鍋煮 — 高溫會破壞活性,務必等食物放涼後再拌入。</p>
+    <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:4px">
+      <input type="checkbox" id="premixOn" onchange="onPremix()" style="width:auto"><span data-i="pxt">我有使用預拌粉 / 補充粉(Premix)</span>
+    </label>
+    <p class="sub" data-i="pxd" style="margin-bottom:12px">填入預拌粉每日提供的營養量,系統會自動從下方採買清單扣除,避免重複購買。</p>
+    <div id="premixBox" class="grid hide">
+      <div class="f"><label data-i="pxca">預拌粉含鈣 (mg/日)</label><input id="pmCa" type="number" min="0" step="1" placeholder="例:1000" inputmode="decimal" oninput="if(last)calc()"></div>
+      <div class="f"><label data-i="pxtau">預拌粉含牛磺酸 (mg/日)</label><input id="pmTau" type="number" min="0" step="1" placeholder="例:250" inputmode="decimal" oninput="if(last)calc()"></div>
+      <div class="f" style="grid-column:1/-1"><label data-i="pxot">其他成分(自訂,僅記錄)</label><input id="pmOther" type="text" placeholder="例:鐵 5mg、離胺酸 200mg、維生素B群" oninput="if(last)calc()"></div>
+    </div>
+  </div>
+
+  <div class="panel">
     <h2><span data-i="sh">🛒 你的採買清單</span></h2>
     <p class="sub" data-i="shs">依你的配方自動計算用量。</p>
     <div class="shop" id="shop"></div>
@@ -390,6 +404,10 @@ const T={zh:{
  s1t:'計算與採買',s1d:'用上方計算機取得配方,依克數採買。肉品優先選人食等級。',
  s2t:'徹底煮熟',s2d:'肉類中心溫度需達 74°C。禁止生食內臟與生蛋白。蔬菜切碎蒸軟。',
  s3t:'補足營養缺口',s3d:'長期純鮮食務必補鈣;貓咪必須補牛磺酸,缺乏會導致心臟病與失明。',
+ pxh:'➕ 另外添加(起鍋放涼後拌入)',pxs:'魚油、鈣粉、綜合維生素、牛磺酸等補充品不進鍋煮 — 高溫會破壞活性,務必等食物放涼後再拌入。',
+ pxt:'我有使用預拌粉 / 補充粉(Premix)',pxd:'填入預拌粉每日提供的營養量,系統會自動從下方採買清單扣除,避免重複購買。',
+ pxca:'預拌粉含鈣 (mg/日)',pxtau:'預拌粉含牛磺酸 (mg/日)',pxot:'其他成分(自訂,僅記錄)',
+ pxProv:t=>`✅ 你的預拌粉已提供:${t}`,pxCaOk:'✅ 鈣已由預拌粉補足,無需額外購買碳酸鈣',pxTauOk:'✅ 牛磺酸已由預拌粉補足',
  s4t:'分裝與觀察',s4d:'冷藏 3 天、冷凍 2 週內食用完畢。觀察便便與體重,每 2 週微調。',
  tt:'⚠︎ 絕對禁止的食材',ft:'Pet Wellness, Elevated',
  fd:'本工具依公開營養標準估算,僅供參考,無法取代獸醫師之專業診斷。毛孩若有慢性疾病、懷孕哺乳或特殊狀況,請先諮詢獸醫師。',
@@ -449,6 +467,10 @@ const T={zh:{
  s1t:'Calculate & Shop',s1d:'Get your formula above, then buy by the gram. Choose human-grade meat.',
  s2t:'Cook Thoroughly',s2d:'Internal temp 74°C. Never feed raw organs or raw egg white. Steam and chop veggies.',
  s3t:'Close the Gaps',s3d:'Long-term fresh feeding needs calcium; cats must have taurine or risk heart disease and blindness.',
+ pxh:'➕ Add Separately (stir in after cooling)',pxs:'Fish oil, calcium, multivitamin and taurine are NOT cooked — heat destroys them. Let food cool, then stir in.',
+ pxt:'I use a premix / supplement powder',pxd:'Enter what your premix provides daily; the shopping list below adjusts automatically to avoid double-buying.',
+ pxca:'Premix calcium (mg/day)',pxtau:'Premix taurine (mg/day)',pxot:'Other contents (custom, note only)',
+ pxProv:t=>`✅ Your premix provides: ${t}`,pxCaOk:'✅ Calcium covered by premix — no need to buy calcium carbonate',pxTauOk:'✅ Taurine covered by premix',
  s4t:'Portion & Observe',s4d:'3 days fridge, 2 weeks freezer. Watch stool and weight; adjust every 2 weeks.',
  tt:'⚠︎ Never Feed These',ft:'Pet Wellness, Elevated',
  fd:'Estimates based on public nutrition standards — for reference only, not a substitute for veterinary advice. Consult your vet for pets with chronic conditions.',
@@ -503,7 +525,50 @@ const t=()=>T[lang];
   }
   document.getElementById('src').innerHTML=t().srcTxt(DB.sources);
   fillBreeds(); renderPicker(); renderTox();
+  loadShared();
 })();
+
+/* ===== 分享連結載入:?f=token 讀回配方並重算 ===== */
+async function loadShared(){
+  const tok=new URLSearchParams(location.search).get('f');
+  if(!tok||!SB_URL||!SB_KEY)return;
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/saved_formulas?share_token=eq.${encodeURIComponent(tok)}&select=*&limit=1`,
+      {headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`}});
+    if(!r.ok)return;
+    const rows=await r.json(); const d=rows&&rows[0]; if(!d)return;
+    // 還原基本資料
+    const setV=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null)el.value=v;};
+    setV('species',d.species); onSpecies();
+    // 品種以名稱回查 index(存的是顯示文字)
+    const bi=(BREEDS[d.species]||[]).findIndex(b=>b.zh===d.breed||b.en===d.breed);
+    if(bi>=0)document.getElementById('breed').value=bi;
+    setV('weight',d.weight_kg); setV('stage',d.life_stage);
+    setV('neuter',d.neutered?'1':'0'); setV('activity',d.activity);
+    setV('health',d.health_mode);
+    // 還原食材勾選
+    picked={protein:[],carb:[],veg:[],oil:[]};
+    (d.ingredients||[]).forEach(x=>{
+      const ing=DB.ingredients.find(i=>i.id===x.id);
+      if(ing&&picked[ing.ui_group])picked[ing.ui_group].push(x.id);
+    });
+    mode=(d.cook_mode==='棄湯')?'棄湯':'連湯';
+    setMode(mode,true);
+    // 還原預拌粉
+    if(d.premix&&d.premix.on){
+      document.getElementById('premixOn').checked=true;
+      document.getElementById('premixBox').classList.remove('hide');
+      if(d.premix.ca)document.getElementById('pmCa').value=d.premix.ca;
+      if(d.premix.tau)document.getElementById('pmTau').value=d.premix.tau;
+      if(d.premix.other)document.getElementById('pmOther').value=d.premix.other;
+    }
+    onHealth(true); renderPicker();
+    calc();
+    // 捲到結果並提示這是分享來的配方
+    const o=document.getElementById('out');
+    if(o){o.classList.remove('hide');o.scrollIntoView({behavior:'smooth',block:'start'});}
+  }catch(e){ console.error('share load fail',e); }
+}
 
 function setLang(l){
   lang=l;
@@ -540,6 +605,18 @@ function onHealth(silent){
   else{ tip.classList.add('hide'); }
   renderPicker();
   if(last&&!silent)calc();
+}
+
+/* ===== premix 另外添加 ===== */
+function onPremix(){
+  const on=document.getElementById('premixOn').checked;
+  document.getElementById('premixBox').classList.toggle('hide',!on);
+  if(last)calc();
+}
+function readPremix(){
+  const on=document.getElementById('premixOn').checked;
+  const num=id=>{const v=parseFloat(document.getElementById(id).value);return isNaN(v)||v<0?0:v};
+  return {on,ca:on?num('pmCa'):0,tau:on?num('pmTau'):0,other:on?document.getElementById('pmOther').value.trim():''};
 }
 
 /* ===== picker ===== */
@@ -646,10 +723,12 @@ function calc(fromToggle){
 
   const totalG=rows.reduce((a,r)=>a+r.g,0);
   const meals=stage==='growth'?3:2;
-  last={s,w,h,stage,kcal,rows,K:Math.round(K),PR,FA,CA,PH,totalG,pT,fT,caT,pCap,meals,
+  const pmx=readPremix();
+  const CAtot=CA+pmx.ca;                       // 食材鈣 + 預拌粉鈣
+  last={s,w,h,stage,kcal,rows,K:Math.round(K),PR,FA,CA:CAtot,PH,totalG,pT,fT,caT,pCap,meals,
         water:Math.round(w*(s==='cat'?55:60)),
-        caCO3:Math.max(0,(caT-CA))/0.4/1000,
-        oilId:oil.id,pids:P.map(x=>x.id)};
+        caCO3:Math.max(0,(caT-CAtot))/0.4/1000,
+        oilId:oil.id,pids:P.map(x=>x.id),pmx};
   render(last);
   document.getElementById('out').classList.remove('hide');
   if(fromToggle&&prevP!==null){
@@ -716,15 +795,23 @@ function render(c){
   document.getElementById('alerts').innerHTML=A.join('');
 
   const ca=c.caCO3<0.1?'0.1':c.caCO3.toFixed(1);
+  const pmx=c.pmx||{on:false,ca:0,tau:0,other:''};
+  const caCovered=pmx.on&&c.caCO3<0.1;                 // 預拌粉把鈣補滿了
+  const tauCovered=pmx.on&&pmx.tau>=250;               // 貓牛磺酸達標
   const items=[
-    {u:1,ic:'🦴',n:T_.sCa,w:T_.sCaW,d:`${ca} g/${lang==='zh'?'日':'day'}`,l:SHOP_LINKS.calcium},
-    ...(c.s==='cat'?[{u:1,ic:'🐱',n:T_.sTa,w:T_.sTaW,d:'250 mg/'+(lang==='zh'?'日':'day'),l:SHOP_LINKS.taurine}]:[]),
+    ...(!caCovered?[{u:1,ic:'🦴',n:T_.sCa,w:T_.sCaW,d:`${ca} g/${lang==='zh'?'日':'day'}`,l:SHOP_LINKS.calcium}]:[]),
+    ...((c.s==='cat'&&!tauCovered)?[{u:1,ic:'🐱',n:T_.sTa,w:T_.sTaW,d:'250 mg/'+(lang==='zh'?'日':'day'),l:SHOP_LINKS.taurine}]:[]),
     {u:0,ic:'💊',n:T_.sMu,w:T_.sMuW,d:T_.label,l:SHOP_LINKS.multi},
     ...((c.oilId!=='fish_oil'&&c.h!=='panc'&&!(c.pids||[]).some(id=>FATTY_FISH.has(id)))?[{u:c.h==='joint'?1:0,ic:'🐟',n:T_.sFo,w:T_.sFoW,d:T_.label,l:SHOP_LINKS.fishoil}]:[]),
     {u:0,ic:'⚖️',n:T_.sSc,w:T_.sScW,d:T_.once,l:SHOP_LINKS.scale},
     {u:0,ic:'🧊',n:T_.sBo,w:T_.sBoW,d:`${c.meals*7} ${lang==='zh'?'格/週':'/week'}`,l:SHOP_LINKS.box}
   ];
-  document.getElementById('shop').innerHTML=items.map(i=>`
+  const notes=[];
+  if(caCovered)notes.push(T_.pxCaOk);
+  if(tauCovered)notes.push(T_.pxTauOk);
+  if(pmx.on&&pmx.other)notes.push(T_.pxProv(pmx.other));
+  const noteHtml=notes.length?`<div class="alert gold" style="margin-bottom:12px">${notes.join('<br>')}</div>`:'';
+  document.getElementById('shop').innerHTML=noteHtml+items.map(i=>`
     <div class="item${i.u?' urgent':''}">
       <div class="ic">${i.ic}</div>
       <div class="need">${T_.need}: ${i.d}</div>
@@ -761,7 +848,8 @@ async function saveFormula(){
       activity:document.getElementById('activity').value,
       health_mode:last.h,cook_mode:mode,
       ingredients:last.rows.map(r=>({id:r.i.id,grams:r.g})),
-      daily_kcal:last.kcal});
+      daily_kcal:last.kcal,
+      premix:last.pmx&&last.pmx.on?last.pmx:null});
     const tok=d[0]?.share_token||'';
     const url=`${location.origin}${location.pathname}?f=${encodeURIComponent(tok)}`;
     o.innerHTML=`<div style="margin-bottom:6px">${t().saved}</div><input readonly value="${url}" onclick="this.select()">`;
