@@ -231,7 +231,11 @@ footer .src{max-width:520px;margin:10px auto 0}
           <option value="none" selected data-i="h0">健康</option>
           <option value="ckd" data-i="h1">腎臟病 CKD(低磷)</option>
           <option value="obese" data-i="h2">過重 / 減重中</option>
-          <option value="allergy" data-i="h3">雞肉過敏</option>
+          <option value="diabetes" data-i="h4">糖尿病</option>
+          <option value="panc" data-i="h5">胰臟炎</option>
+          <option value="liver" data-i="h6">肝病</option>
+          <option value="urinary" data-i="h7">泌尿道 / 結石</option>
+          <option value="joint" data-i="h8">關節炎</option>
         </select></div>
     </div>
   </div>
@@ -332,6 +336,8 @@ footer .src{max-width:520px;margin:10px auto 0}
 <script>
 /* ===== config ===== */
 const DATA_URLS=['/public/data/nutrition-db-v1.json','/data/nutrition-db-v1.json'];
+// 高脂魚(蛋白質已含 Omega-3,不再重複推薦魚油):鮭魚/鯖魚/秋刀魚
+const FATTY_FISH=new Set(['J0402401','J0414810','J0416501']);
 // TODO: Wind 提供蝦皮聯盟追蹤連結後,替換 SHOP_LINKS 內的 url
 const SHOP_LINKS={
   calcium:'https://shopee.tw/search?keyword=%E7%A2%B3%E9%85%B8%E9%88%A3%20%E5%AF%B5%E7%89%A9',
@@ -369,7 +375,7 @@ const T={zh:{
  fsp:'物種',dog:'🐶 狗狗',cat:'🐱 貓咪',fbr:'品種',fw:'體重 kg',fst:'生命階段',
  s1:'幼年(未滿1歲)',s2:'成年',s3:'高齡(7歲以上)',
  fn:'結紮',n1:'已結紮',n0:'未結紮',fa:'活動量',a1:'低',a2:'中',a3:'高',
- fh:'健康狀況',h0:'健康',h1:'腎臟病 CKD(低磷)',h2:'過重 / 減重中',h3:'雞肉過敏',
+ fh:'健康狀況',h0:'健康',h1:'腎臟病 CKD(低磷)',h2:'過重 / 減重中',h4:'糖尿病',h5:'胰臟炎',h6:'肝病',h7:'泌尿道 / 結石',h8:'關節炎',
  m1a:'🍲 連湯餵食',m1b:'整鍋連湯帶料',m2a:'🥣 棄掉湯汁',m2b:'只撈料,湯倒掉',
  go:'計算我的配方 ✦',
  rk:'每日熱量',rg:'每日總食量',rm:'單餐份量',rw:'建議飲水',
@@ -400,7 +406,11 @@ const T={zh:{
  flash:(mg,pct)=>`✓ 少了 ${mg} mg 的磷(降 ${pct}%)`,
  ckdA:'<b>腎臟病模式</b>磷目標已下修、蛋白質採「適量優質」策略。CKD 分期需求差異大,執行前請與獸醫確認血檢(BUN、CREA、SDMA、血磷)。',
  obA:'<b>減重模式</b>熱量已打 8 折。每週減重勿超過體重 1–2%,貓咪過快減重有脂肪肝風險。',
- alA:'<b>過敏模式</b>雞肉相關食材已停用(火雞為不同蛋白源,仍可使用)。建議進行 8 週單一新穎蛋白排除飲食試驗。',
+ dbA:'<b>糖尿病模式</b>飲食方向:高纖維、複合碳水(糙米/燕麥/南瓜)、降低脂肪、穩定蛋白質,並定時定量餵食以平穩血糖。胰島素劑量與飲食需同步調整,請務必與獸醫確認營養目標。',
+ pcA:'<b>胰臟炎模式</b>飲食方向:嚴格低脂是關鍵,本模式已大幅下修脂肪目標。標 ⚠ 的高脂食材建議避開,勿額外添加油脂。急性期或反覆發作的毛孩,請先遵循獸醫的餵食計畫再使用本配方。',
+ lvA:'<b>肝病模式</b>飲食方向:適量「優質」蛋白(不宜過度限制)、增加碳水供能、避開肝臟等高銅內臟(標 ⚠)。豆腐等植物性蛋白產氨較少,對肝臟較友善,可納入蛋白質組合。肝病類型(門脈分流/肝炎/脂肪肝)需求差異大,請與獸醫確認蛋白質目標。',
+ urA:'<b>泌尿道模式</b>飲食方向:增加水分攝取是第一原則——鮮食含水已優於乾糧,可再額外加水。結石類型不同(草酸鈣/磷酸銨鎂)飲食方向相反,請先與獸醫確認結石類型再調整配方。',
+ jtA:'<b>關節保養模式</b>飲食方向:補充 Omega-3(魚油或鮭魚/鯖魚/秋刀魚等高脂魚)抗發炎、控制體重以減輕關節負擔。若毛孩同時過重,建議與獸醫討論減重計畫。',
  sCa:'碳酸鈣 / 寵物鈣粉',sCaW:'鮮食幾乎不含鈣。這是你配方中最大的缺口,不補會造成骨骼疾病。',
  sTa:'牛磺酸',sTaW:'貓咪必需胺基酸,無法自行合成。長期缺乏會導致擴張性心肌病與視網膜退化。',
  sMu:'犬貓綜合營養粉',sMuW:'補足鮮食難以涵蓋的微量元素與維生素。',
@@ -424,7 +434,7 @@ const T={zh:{
  fsp:'Species',dog:'🐶 Dog',cat:'🐱 Cat',fbr:'Breed',fw:'Weight kg',fst:'Life Stage',
  s1:'Young (<1 yr)',s2:'Adult',s3:'Senior (7+)',
  fn:'Neutered',n1:'Yes',n0:'No',fa:'Activity',a1:'Low',a2:'Moderate',a3:'High',
- fh:'Health',h0:'Healthy',h1:'Kidney Disease (CKD)',h2:'Overweight',h3:'Chicken Allergy',
+ fh:'Health',h0:'Healthy',h1:'Kidney Disease (CKD)',h2:'Overweight',h4:'Diabetes',h5:'Pancreatitis',h6:'Liver Disease',h7:'Urinary / Stones',h8:'Joint Care',
  m1a:'🍲 With Broth',m1b:'Feed everything',m2a:'🥣 Drain Broth',m2b:'Solids only',
  go:'Calculate My Formula ✦',
  rk:'Daily Calories',rg:'Total Food/Day',rm:'Per Meal',rw:'Water',
@@ -455,7 +465,11 @@ const T={zh:{
  flash:(mg,pct)=>`✓ ${mg} mg less phosphorus (−${pct}%)`,
  ckdA:'<b>CKD Mode</b>Phosphorus target lowered; moderate high-quality protein strategy. Stages vary widely — confirm bloodwork (BUN, CREA, SDMA, serum P) with your vet.',
  obA:'<b>Weight Loss Mode</b>Calories set to 80%. Aim for ≤1–2% body weight loss per week; rapid loss in cats risks hepatic lipidosis.',
- alA:'<b>Allergy Mode</b>Chicken ingredients disabled (turkey is a separate protein and remains available). Consider an 8-week novel-protein elimination trial.',
+ dbA:'<b>Diabetes Mode</b>Direction: high fiber, complex carbs (brown rice/oats/pumpkin), lower fat, steady protein, and consistent meal timing to smooth blood glucose. Insulin dosing and diet must change together — confirm targets with your vet.',
+ pcA:'<b>Pancreatitis Mode</b>Direction: strict low fat is critical — the fat target has been reduced sharply. Avoid ⚠-marked fatty ingredients and add no extra oil. During or after flare-ups, follow your vet\'s feeding plan first.',
+ lvA:'<b>Liver Mode</b>Direction: moderate high-quality protein (do not over-restrict), more carbs for energy, avoid copper-rich organ meats like liver (⚠). Plant proteins like tofu produce less ammonia and are liver-friendly. Liver conditions vary widely — confirm protein targets with your vet.',
+ urA:'<b>Urinary Mode</b>Direction: water intake comes first — fresh food already beats kibble, and extra water helps more. Stone types (calcium oxalate vs. struvite) need opposite diets — confirm the stone type with your vet before adjusting.',
+ jtA:'<b>Joint Care Mode</b>Direction: Omega-3 (fish oil or oily fish like salmon/mackerel/saury) for inflammation, plus weight control to unload joints. If your pet is also overweight, discuss a weight-loss plan with your vet.',
  sCa:'Calcium Carbonate',sCaW:'Fresh food contains almost no calcium. This is the biggest gap in your formula — skipping it causes bone disease.',
  sTa:'Taurine',sTaW:'Essential for cats; they cannot synthesize it. Deficiency causes dilated cardiomyopathy and retinal degeneration.',
  sMu:'Vitamin-Mineral Mix',sMuW:'Covers trace minerals and vitamins fresh food struggles to provide.',
@@ -520,10 +534,10 @@ function fillW(){
 function onHealth(silent){
   const h=document.getElementById('health').value;
   const tip=document.getElementById('ckdtip');
-  if(h==='ckd'){
-    setMode('棄湯',true);
-    tip.innerHTML=t().ckdTip; tip.classList.remove('hide');
-  }else{ tip.classList.add('hide'); }
+  const tipMap={ckd:'ckdTip',diabetes:'dbA',panc:'pcA',liver:'lvA',urinary:'urA',joint:'jtA'};
+  if(h==='ckd')setMode('棄湯',true);
+  if(tipMap[h]){ tip.innerHTML=t()[tipMap[h]]; tip.classList.remove('hide'); }
+  else{ tip.classList.add('hide'); }
   renderPicker();
   if(last&&!silent)calc();
 }
@@ -538,11 +552,12 @@ function renderPicker(){
   document.getElementById('picker').innerHTML=groups.map(([k,title,hint,max])=>{
     const list=DB.ingredients.filter(i=>i.ui_group===k);
     const chips=list.map(i=>{
-      const dis=(h==='allergy'&&i.chicken);
-      if(dis)picked[k]=picked[k].filter(x=>x!==i.id);
       const on=picked[k].includes(i.id);
-      const warn=(h==='ckd'&&i.hi_phos)?'<span class="p">⚠</span>':'';
-      return `<button class="chip${on?' on':''}" ${dis?'disabled':''} onclick="tog('${k}','${i.id}',${max})">${i.name_zh}${warn}</button>`;
+      let warn='';
+      if(h==='ckd'&&i.hi_phos)warn='<span class="p">⚠</span>';
+      else if((h==='panc'||h==='diabetes')&&i.per100g.fat_g>=15)warn='<span class="p">⚠</span>';
+      else if(h==='liver'&&i.name_zh.includes('肝'))warn='<span class="p">⚠</span>';
+      return `<button class="chip${on?' on':''}" onclick="tog('${k}','${i.id}',${max})">${i.name_zh}${warn}</button>`;
     }).join('');
     return `<div class="cat"><h3>${title}<span>${hint}</span></h3><div class="chips">${chips}</div></div>`;
   }).join('');
@@ -594,6 +609,8 @@ function calc(fromToggle){
   let pPct=s==='cat'?.40:.30, fPct=s==='cat'?.30:.25;
   if(h==='ckd'){pPct-=.08;fPct+=.08}
   if(h==='obese'){fPct-=.07;pPct+=.05}
+  if(h==='diabetes'){fPct-=.05}
+  if(h==='panc'){fPct=s==='cat'?.15:.12}
   const pT=kcal*pPct/4, fT=kcal*fPct/9;
   const caT=kcal*1.25;                       // mg
   const pCap=h==='ckd'?kcal*0.7:kcal*1.6;    // mg
@@ -632,7 +649,7 @@ function calc(fromToggle){
   last={s,w,h,stage,kcal,rows,K:Math.round(K),PR,FA,CA,PH,totalG,pT,fT,caT,pCap,meals,
         water:Math.round(w*(s==='cat'?55:60)),
         caCO3:Math.max(0,(caT-CA))/0.4/1000,
-        oilId:oil.id};
+        oilId:oil.id,pids:P.map(x=>x.id)};
   render(last);
   document.getElementById('out').classList.remove('hide');
   if(fromToggle&&prevP!==null){
@@ -691,7 +708,11 @@ function render(c){
   const A=[];
   if(c.h==='ckd')A.push(`<div class="alert red">${T_.ckdA}</div>`);
   if(c.h==='obese')A.push(`<div class="alert gold">${T_.obA}</div>`);
-  if(c.h==='allergy')A.push(`<div class="alert gold">${T_.alA}</div>`);
+  if(c.h==='diabetes')A.push(`<div class="alert gold">${T_.dbA}</div>`);
+  if(c.h==='panc')A.push(`<div class="alert red">${T_.pcA}</div>`);
+  if(c.h==='liver')A.push(`<div class="alert gold">${T_.lvA}</div>`);
+  if(c.h==='urinary')A.push(`<div class="alert gold">${T_.urA}</div>`);
+  if(c.h==='joint')A.push(`<div class="alert gold">${T_.jtA}</div>`);
   document.getElementById('alerts').innerHTML=A.join('');
 
   const ca=c.caCO3<0.1?'0.1':c.caCO3.toFixed(1);
@@ -699,7 +720,7 @@ function render(c){
     {u:1,ic:'🦴',n:T_.sCa,w:T_.sCaW,d:`${ca} g/${lang==='zh'?'日':'day'}`,l:SHOP_LINKS.calcium},
     ...(c.s==='cat'?[{u:1,ic:'🐱',n:T_.sTa,w:T_.sTaW,d:'250 mg/'+(lang==='zh'?'日':'day'),l:SHOP_LINKS.taurine}]:[]),
     {u:0,ic:'💊',n:T_.sMu,w:T_.sMuW,d:T_.label,l:SHOP_LINKS.multi},
-    ...(c.oilId!=='fish_oil'?[{u:0,ic:'🐟',n:T_.sFo,w:T_.sFoW,d:T_.label,l:SHOP_LINKS.fishoil}]:[]),
+    ...((c.oilId!=='fish_oil'&&c.h!=='panc'&&!(c.pids||[]).some(id=>FATTY_FISH.has(id)))?[{u:c.h==='joint'?1:0,ic:'🐟',n:T_.sFo,w:T_.sFoW,d:T_.label,l:SHOP_LINKS.fishoil}]:[]),
     {u:0,ic:'⚖️',n:T_.sSc,w:T_.sScW,d:T_.once,l:SHOP_LINKS.scale},
     {u:0,ic:'🧊',n:T_.sBo,w:T_.sBoW,d:`${c.meals*7} ${lang==='zh'?'格/週':'/week'}`,l:SHOP_LINKS.box}
   ];
